@@ -8,8 +8,11 @@ there are 3 main files:
 
 To run that:
 -cd to this directory
+
 -run command: sudo mn --custom cus_3host.py --topo mytopo
--In mininet:(Paul has shown me how to do it, and it works) 
+
+-In mininet:(Paul has shown me how to do it, and it works)
+
 	h2 ifconfig h2-eth1 192.168.1.2 netmask 255.255.255.0
 	h3 ifconfig h3-eth0 192.168.1.3 netmask 255.255.255.0
 	xterm h1
