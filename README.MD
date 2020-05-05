@@ -1,3 +1,4 @@
+(please remove all my files when we come to the project)
 Hi guys, I'm very confused about the raw packet. So I upload code here, so you can see what I did. Fogive me, I don't know much about socket programming. Just for testing purposes. 
 
 there are 3 main files:
