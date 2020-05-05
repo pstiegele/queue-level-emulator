@@ -18,8 +18,11 @@ To run that:
 	xterm h1
 	xterm h2
 	xterm h3
-- At h1 window, we send a icmp raw packet to h2: python2 icmp_raw.py
-- At h2 window, we execute: python2 icmp_raw_MiddleHost.py.
-- At h3 window, we capture the forwarded packet: tcpdump -i h3-eth0
+- At h1 window, we send a icmp raw packet to h2: 
+    python2 icmp_raw.py
+- At h2 window, we execute:
+    python2 icmp_raw_MiddleHost.py.
+- At h3 window, we capture the forwarded packet:
+    tcpdump -i h3-eth0
 
    
