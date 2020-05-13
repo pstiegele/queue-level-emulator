@@ -9,7 +9,7 @@ ip= "10.0.0.2"
 port1 = 1
 port2=2
 
-ip_h3= "10.0.0.3"
+ip_h3= "192.168.1.3"
 port_h3=1
 h3_address= (ip_h3,port_h3)
 
