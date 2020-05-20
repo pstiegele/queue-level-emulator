@@ -1,0 +1,27 @@
+
+
+func receive_layer3(){
+	protocol := "icmp"
+	//netaddr, _ := net.ResolveIPAddr("ip4", "127.0.0.1")
+	conn, _ := net.ListenIP("ip4:"+protocol, nil)
+
+	for {
+		buf := make([]byte, 1024)
+		numRead, _, _ := conn.ReadFrom(buf)
+		fmt.Printf("% X\n", buf[:numRead])
+		destination_address := buf[32:35] //falsch
+		fmt.Println("destination", destination_address)
+		send_layer3(buf[:numRead])
+	}
+
+}
+
+
+func send_layer3(p []byte){
+	conn, err := net.Dial("ip4:icmp", "10.0.3.1")
+	if err != nil {
+		log.Fatalf("Dial: %s\n", err)
+	}
+
+	conn.Write(p)
+}
