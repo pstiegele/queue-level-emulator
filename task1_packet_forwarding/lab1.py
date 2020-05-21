@@ -40,7 +40,7 @@ def whatToEvaluate():
     print("0: Nothing")
     print("1: Ping")
     print("2: Iperf3 TCP")
-    print("3: Iperf3 UDP")
+    print("3: Iperf3 UDiP")
     print()
     return input()
 
@@ -60,9 +60,15 @@ def startPacketForwarding(network, language):
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
     
     if language == "1": # Python
+        h2.cmd('cd python')
+        h2.cmd('sudo python3 icmp_raw_MiddleHost.py')
+        #h2.cmd('./start_forwarding.sh')
         print("not yet implemented")
 
     if language == "2": # C
+        h2.cmd('cd python')
+        h2.cmd('sudo gcc -pthread /C/h2_forwarding.c -lpcap')
+        h2.cmd('./a.out')
         print("not yet implemented")
 
     if language == "3": # Go

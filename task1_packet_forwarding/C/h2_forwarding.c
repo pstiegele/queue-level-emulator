@@ -92,14 +92,14 @@ void process_packet2(u_char*args,const struct pcap_pkthdr*header, const u_char*b
     {
         case 1:  //ICMP Protocol
             ++icmp;
-			printf("ICMP 1");
-			modify_ethernet_header_2(buffer,size);
+	    printf("ICMP 1");
+	    //modify_ethernet_header_2(buffer,size);
             pcap_inject(handle,buffer,size);
             break;
         default: //Some Other Protocol like ARP etc.
             ++others;
-            printf("This is other packets at eth1");
-			modify_ethernet_header_2(buffer,size);
+           // printf("This is other packets at eth1");
+	   // modify_ethernet_header_2(buffer,size);
             pcap_inject(handle,buffer,size);
             break;
 			
@@ -119,14 +119,14 @@ void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char
         case 1:  //ICMP Protocol
             ++icmp;
             //print_icmp_packet( buffer , size);
-			printf("ICMP 1");
-			modify_ethernet_header(buffer,size);
+	    //printf("ICMP 1");
+	    //modify_ethernet_header(buffer,size);
             pcap_inject(handle_2,buffer,size);
-			break;
+	    break;
         default: //Some Other Protocol like ARP etc.
             ++others;
-			modify_ethernet_header(buffer,size);
-			pcap_inject(handle_2,buffer,size);
+	    //modify_ethernet_header(buffer,size);
+	    pcap_inject(handle_2,buffer,size);
             break;
     }
 }
@@ -148,12 +148,12 @@ void modify_ethernet_header_2(const u_char *Buffer, int Size)
         eth2->h_dest[5]=0x01;
 
 
-		eth2->h_source[0]=0x00;	
-		eth2->h_source[1]=0x00;	
-		eth2->h_source[2]=0x00;	
-		eth2->h_source[3]=0x00;	
-		eth2->h_source[4]=0x00;	
-		eth2->h_source[5]=0x02;	
+	eth2->h_source[0]=0x00;	
+	eth2->h_source[1]=0x00;	
+	eth2->h_source[2]=0x00;	
+	eth2->h_source[3]=0x00;	
+	eth2->h_source[4]=0x00;	
+	eth2->h_source[5]=0x02;	
    }
 
     //fprintf(logfile , "\n");
@@ -170,19 +170,19 @@ void modify_ethernet_header(const u_char *Buffer, int Size)
 {
     struct ethhdr *eth = (struct ethhdr *)Buffer;
    if(eth->h_source[5]=0x01){ 
-		eth->h_dest[0]=0x00;
-		eth->h_dest[1]=0x00;
-		eth->h_dest[2]=0x00;
+	eth->h_dest[0]=0x00;
+	eth->h_dest[1]=0x00;
+	eth->h_dest[2]=0x00;
     	eth->h_dest[3]=0x00;
     	eth->h_dest[4]=0x00;
-		eth->h_dest[5]=0x03;
+	eth->h_dest[5]=0x03;
 		
-		eth->h_source[0]=0x32;
-		eth->h_source[1]=0x75;
-		eth->h_source[2]=0x3b;
+	eth->h_source[0]=0x32;
+	eth->h_source[1]=0x75;
+	eth->h_source[2]=0x3b;
     	eth->h_source[3]=0x81;
     	eth->h_source[4]=0x9f;
-		eth->h_source[5]=0xd8;
+	eth->h_source[5]=0xd8;
 	
    }
 	   
