@@ -13,7 +13,7 @@ func main() {
 	fmt.Printf("started!\n")
 	go receive("h2-eth0", []byte{0, 0, 0, 0, 0, 1}, []byte{0, 0, 0, 0, 0, 3}, "h2-eth1", 1)
 	go receive("h2-eth1", []byte{0, 0, 0, 0, 0, 3}, []byte{0, 0, 0, 0, 0, 1}, "h2-eth0", 1)
-	time.Sleep(60 * time.Second)
+	wait()
 }
 
 func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInterface string, turnSendingOn int){
