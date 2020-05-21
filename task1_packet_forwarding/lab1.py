@@ -61,15 +61,12 @@ def startPacketForwarding(network, language):
     
     if language == "1": # Python
         h2.cmd('cd python')
-        h2.cmd('sudo python3 icmp_raw_MiddleHost.py')
-        #h2.cmd('./start_forwarding.sh')
-        print("not yet implemented")
+        h2.cmd('./start_forwarding.sh')
 
     if language == "2": # C
-        h2.cmd('cd python')
-        h2.cmd('sudo gcc -pthread /C/h2_forwarding.c -lpcap')
-        h2.cmd('./a.out')
-        print("not yet implemented")
+        h2.cmd('cd C')
+        h2.cmd('./start_forwarding.sh')
+        
 
     if language == "3": # Go
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
@@ -125,7 +122,7 @@ def startEvaluation(network, evaluation):
 
 
 if __name__ == '__main__':
-    setLogLevel('info')
+    setLogLevel('debug')
     language = whichLanguage()
     if language == "0": # if language=0 change ips so that h1 and h3 are in different networks
         h1_ip = "10.0.1.1"

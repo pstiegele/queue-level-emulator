@@ -1,2 +1,3 @@
 #!/bin/bash
-sudo python3 icmp_raw_MiddleHost.py
+sudo python3 icmp_raw_MiddleHost.py & 
+echo $1 &
