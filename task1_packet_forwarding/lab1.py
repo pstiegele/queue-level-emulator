@@ -60,12 +60,11 @@ def startPacketForwarding(network, language):
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
     
     if language == "1": # Python
-        h2.cmd('cd python')
-        h2.cmd('./start_forwarding.sh')
+        h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
 
     if language == "2": # C
-        h2.cmd('cd C')
-        h2.cmd('./start_forwarding.sh')
+        h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
+        h2.cmd('./a.out &')
         
 
     if language == "3": # Go
