@@ -24,10 +24,11 @@ def whichLanguage():
     print()
     print("***** Which language do you want to use for packet forwarding?")
     print()
-    print("0: No implementation, just net.ipv4.ip_forward=1")
-    print("1: Python")
-    print("2: C")
-    print("3: Go")
+    print("0: Nothing")
+    print("1: No implementation, just net.ipv4.ip_forward=1")
+    print("2: Python")
+    print("3: C")
+    print("4: Go")
     print()
     return input()
 
@@ -52,22 +53,22 @@ def startPacketForwarding(network, language):
     h1.cmd('ethtool --offload h1-eth0 rx off tx off ') # disable tcp checksums
     h3.cmd('ethtool --offload h3-eth0 rx off tx off ') # disable tcp checksums
 
-    if language == "0": # ip_forward=1
+    if language == "1": # ip_forward=1
         h2.setIP(h2_ip_eth0+'/24', intf='h2-eth0')
         h2.setIP(h2_ip_eth1+'/24', intf='h2-eth1')
         h2.cmd('sudo sysctl net.ipv4.ip_forward=1')
         h1.cmd('ip route add default via '+h2_ip_eth0+' dev h1-eth0')
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
     
-    if language == "1": # Python
+    if language == "2": # Python
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
 
-    if language == "2": # C
+    if language == "3": # C
         h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
         
 
-    if language == "3": # Go
+    if language == "4": # Go
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('./golang/forwardTraffic &')
 
@@ -123,7 +124,7 @@ def startEvaluation(network, evaluation):
 if __name__ == '__main__':
     setLogLevel('info')
     language = whichLanguage()
-    if language == "0": # if language=0 change ips so that h1 and h3 are in different networks
+    if language == "1": # if language=0 change ips so that h1 and h3 are in different networks
         h1_ip = "10.0.1.1"
         h2_ip_eth0 = "10.0.1.2"
         h2_ip_eth1 = "10.0.3.2"
