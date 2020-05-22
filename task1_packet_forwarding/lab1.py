@@ -24,7 +24,7 @@ def whichLanguage():
     print()
     print("***** Which language do you want to use for packet forwarding?")
     print()
-    print("0: Nothing")
+    print("0: Nothing, only topology")
     print("1: No implementation, just net.ipv4.ip_forward=1")
     print("2: Python")
     print("3: C")
