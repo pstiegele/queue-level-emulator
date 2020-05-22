@@ -122,7 +122,7 @@ def startEvaluation(network, evaluation):
 
 
 if __name__ == '__main__':
-    setLogLevel('debug')
+    setLogLevel('info')
     language = whichLanguage()
     if language == "0": # if language=0 change ips so that h1 and h3 are in different networks
         h1_ip = "10.0.1.1"

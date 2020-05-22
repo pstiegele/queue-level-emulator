@@ -6,17 +6,19 @@ import (
 	"log"
 	"net"
 	"syscall"
-	"time"
+	"sync"
 )
 
 func main() {
-	fmt.Printf("started!\n")
-	go receive("h2-eth0", []byte{0, 0, 0, 0, 0, 1}, []byte{0, 0, 0, 0, 0, 3}, "h2-eth1", 1)
-	go receive("h2-eth1", []byte{0, 0, 0, 0, 0, 3}, []byte{0, 0, 0, 0, 0, 1}, "h2-eth0", 1)
-	wait()
+	fmt.Printf("golang package forwarding started!\n")
+	wg := new(sync.WaitGroup)
+	go receive("h2-eth0", []byte{0, 0, 0, 0, 0, 1}, []byte{0, 0, 0, 0, 0, 3}, "h2-eth1", 1, wg)
+	go receive("h2-eth1", []byte{0, 0, 0, 0, 0, 3}, []byte{0, 0, 0, 0, 0, 1}, "h2-eth0", 1, wg)
+	wg.Add(2)
+	wg.Wait()
 }
 
-func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInterface string, turnSendingOn int){
+func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInterface string, turnSendingOn int, wg *sync.WaitGroup){
 	fd, _ := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, 0x0300)
 	//err := syscall.BindToDevice(fd, receiveInterface)
 	//err := syscall.SetsockoptString(fd, syscall.SOL_SOCKET, syscall.SO_BINDTODEVICE, receiveInterface)
@@ -48,6 +50,7 @@ func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInte
 		}
 
 	}
+	defer wg.Done()
 }
 
 
