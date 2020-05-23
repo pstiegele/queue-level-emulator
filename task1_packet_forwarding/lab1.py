@@ -41,7 +41,7 @@ def whatToEvaluate():
     print("0: Nothing")
     print("1: Ping")
     print("2: Iperf3 TCP")
-    print("3: Iperf3 UDiP")
+    print("3: Iperf3 UDP")
     print()
     return input()
 
@@ -54,6 +54,7 @@ def startPacketForwarding(network, language):
     h3.cmd('ethtool --offload h3-eth0 rx off tx off ') # disable tcp checksums
 
     if language == "1": # ip_forward=1
+        print("ip_forward=1 selected")
         h2.setIP(h2_ip_eth0+'/24', intf='h2-eth0')
         h2.setIP(h2_ip_eth1+'/24', intf='h2-eth1')
         h2.cmd('sudo sysctl net.ipv4.ip_forward=1')
@@ -61,14 +62,17 @@ def startPacketForwarding(network, language):
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
     
     if language == "2": # Python
+        print("python selected")
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
 
     if language == "3": # C
+        print("C selected")
         h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
         
 
     if language == "4": # Go
+        print("Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('./golang/forwardTraffic &')
 
@@ -88,11 +92,11 @@ def startEvaluation(network, evaluation):
         print("***** Evaluate Ping:")
         print()
         print("h1 --> h3:")
-        res = h1.cmd('ping '+h3_ip+' -c 2')
+        res = h1.cmd('ping '+h3_ip+' -c 20')
         print(res)
         print()
         print("h3 --> h1:")
-        res = h3.cmd('ping '+h1_ip+' -c 2')
+        res = h3.cmd('ping '+h1_ip+' -c 20')
         print(res)
 
     if evaluation == "2":
