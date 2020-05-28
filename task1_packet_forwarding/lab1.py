@@ -3,6 +3,7 @@ from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.topo import Topo
 import subprocess
+import os
 
 
 h1_ip = "10.0.0.1"
@@ -29,6 +30,7 @@ def whichLanguage():
     print("2: Python")
     print("3: C")
     print("4: Go")
+    print("5: Rust")
     print()
     return input()
 
@@ -54,7 +56,7 @@ def startPacketForwarding(network, language):
     h3.cmd('ethtool --offload h3-eth0 rx off tx off ') # disable tcp checksums
 
     if language == "1": # ip_forward=1
-        print("ip_forward=1 selected")
+        print("***** ip_forward=1 selected")
         h2.setIP(h2_ip_eth0+'/24', intf='h2-eth0')
         h2.setIP(h2_ip_eth1+'/24', intf='h2-eth1')
         h2.cmd('sudo sysctl net.ipv4.ip_forward=1')
@@ -62,19 +64,24 @@ def startPacketForwarding(network, language):
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
     
     if language == "2": # Python
-        print("python selected")
+        print("***** Python selected")
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
 
     if language == "3": # C
-        print("C selected")
+        print("***** C selected")
         h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
         
 
     if language == "4": # Go
-        print("Go selected")
+        print("***** Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('./golang/forwardTraffic &')
+    
+    if language == "5": # Rust
+        print("***** Rust selected")
+        h2.cmd('cd rust')
+        h2.cmd('~/.cargo/bin/cargo run &')
 
 
 def startEvaluation(network, evaluation):
@@ -126,6 +133,7 @@ def startEvaluation(network, evaluation):
 
 
 if __name__ == '__main__':
+    os.system('sudo mn -c')
     setLogLevel('info')
     language = whichLanguage()
     if language == "1": # if language=0 change ips so that h1 and h3 are in different networks
