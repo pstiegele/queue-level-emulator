@@ -1,0 +1,10 @@
+/home/pstiegele/lab/task1_packet_forwarding/rust/target/rls/debug/deps/pnet_datalink-fb4399b556e5d6c1.rmeta: /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/lib.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/mod.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/linux.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/linux.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/unix_interfaces.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/dummy.rs
+
+/home/pstiegele/lab/task1_packet_forwarding/rust/target/rls/debug/deps/pnet_datalink-fb4399b556e5d6c1.d: /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/lib.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/mod.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/linux.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/linux.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/unix_interfaces.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/dummy.rs
+
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/lib.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/mod.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/bindings/linux.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/linux.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/unix_interfaces.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/pnet_datalink-0.26.0/src/dummy.rs:

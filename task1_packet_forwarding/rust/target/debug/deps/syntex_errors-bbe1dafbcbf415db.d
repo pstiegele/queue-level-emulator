@@ -1,0 +1,11 @@
+/home/pstiegele/lab/task1_packet_forwarding/rust/target/debug/deps/syntex_errors-bbe1dafbcbf415db.rmeta: /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/lib.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/emitter.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/snippet.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/registry.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/styled_buffer.rs
+
+/home/pstiegele/lab/task1_packet_forwarding/rust/target/debug/deps/libsyntex_errors-bbe1dafbcbf415db.rlib: /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/lib.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/emitter.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/snippet.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/registry.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/styled_buffer.rs
+
+/home/pstiegele/lab/task1_packet_forwarding/rust/target/debug/deps/syntex_errors-bbe1dafbcbf415db.d: /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/lib.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/emitter.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/snippet.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/registry.rs /home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/styled_buffer.rs
+
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/lib.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/emitter.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/snippet.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/registry.rs:
+/home/pstiegele/.cargo/registry/src/github.com-1ecc6299db9ec823/syntex_errors-0.42.0/src/styled_buffer.rs:
