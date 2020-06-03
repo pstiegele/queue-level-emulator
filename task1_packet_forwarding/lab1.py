@@ -27,11 +27,11 @@ def whichLanguage():
     print()
     print("0: Nothing, only topology")
     print("1: No implementation, just net.ipv4.ip_forward=1")
-    print("2: Python")
+    print("2: Python3")
     print("3: C")
     print("4: Go")
     print("5: Rust")
-    print("6: Pyton2")
+    print("6: Python2")
     print()
     return input()
 
@@ -63,15 +63,17 @@ def startPacketForwarding(network, language):
         h2.cmd('sudo sysctl net.ipv4.ip_forward=1')
         h1.cmd('ip route add default via '+h2_ip_eth0+' dev h1-eth0')
         h3.cmd('ip route add default via '+h2_ip_eth1+' dev h3-eth0')
-    
+    else:
+       h2.cmd('sudo sysctl net.ipv4.ip_forward=0') #be sure that ip_forwarding is disabled
+
     if language == "2": # Python
         print("***** Python selected")
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
-        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
 
     if language == "3": # C
         print("***** C selected")
-        h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
+        h2.cmd('cd C')
+        h2.cmd('sudo gcc -pthread h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
 
     if language == "4": # Go
@@ -88,7 +90,6 @@ def startPacketForwarding(network, language):
 
     if language == "6": #Python2
         print("***** Python2 selected")
-        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
         h2.cmd('sudo python2 python/python2_icmp_raw_MiddleHost.py &')
 
 
@@ -107,11 +108,11 @@ def startEvaluation(network, evaluation):
         print("***** Evaluate Ping:")
         print()
         print("h1 --> h3:")
-        res = h1.cmd('ping '+h3_ip+' -c 20')
+        res = h1.cmd('ping '+h3_ip+' -c 100 -i 0.01')
         print(res)
         print()
         print("h3 --> h1:")
-        res = h3.cmd('ping '+h1_ip+' -c 20')
+        res = h3.cmd('ping '+h1_ip+' -c 100 -i 0.01')
         print(res)
 
     if evaluation == "2":
@@ -142,7 +143,7 @@ def startEvaluation(network, evaluation):
 
 if __name__ == '__main__':
     os.system('sudo mn -c')
-    setLogLevel('debug')
+    setLogLevel('info')
     language = whichLanguage()
     if language == "1": # if language=0 change ips so that h1 and h3 are in different networks
         h1_ip = "10.0.1.1"
