@@ -29,6 +29,7 @@ def whichLanguage():
     print("2: Python")
     print("3: C")
     print("4: Go")
+    print("5: Python2")
     print()
     return input()
 
@@ -63,6 +64,7 @@ def startPacketForwarding(network, language):
     
     if language == "2": # Python
         print("python selected")
+        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
 
     if language == "3": # C
@@ -75,7 +77,11 @@ def startPacketForwarding(network, language):
         print("Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('./golang/forwardTraffic &')
-
+    
+    if language =="5": #Python2
+        print("Python2 selected")
+        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
+        h2.cmd('sudo python2 python/python2_icmp_raw_MiddleHost.py &')
 
 def startEvaluation(network, evaluation):
     h1 = network.get('h1')
