@@ -76,12 +76,14 @@ def startPacketForwarding(network, language):
     if language == "4": # Go
         print("***** Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
+        h2.cmd('chmod +x ./golang/forwardTraffic')
         h2.cmd('./golang/forwardTraffic &')
     
     if language == "5": # Rust
         print("***** Rust selected")
         h2.cmd('cd rust')
-        h2.cmd('~/.cargo/bin/cargo run &')
+        h2.cmd('cargo build --out-dir ./ -Z unstable-options')
+        h2.cmd('./rust &')
 
 
 def startEvaluation(network, evaluation):
@@ -134,7 +136,7 @@ def startEvaluation(network, evaluation):
 
 if __name__ == '__main__':
     os.system('sudo mn -c')
-    setLogLevel('info')
+    setLogLevel('debug')
     language = whichLanguage()
     if language == "1": # if language=0 change ips so that h1 and h3 are in different networks
         h1_ip = "10.0.1.1"
