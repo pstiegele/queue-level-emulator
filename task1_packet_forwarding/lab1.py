@@ -31,6 +31,7 @@ def whichLanguage():
     print("3: C")
     print("4: Go")
     print("5: Rust")
+    print("6: Pyton2")
     print()
     return input()
 
@@ -43,7 +44,7 @@ def whatToEvaluate():
     print("0: Nothing")
     print("1: Ping")
     print("2: Iperf3 TCP")
-    print("3: Iperf3 UDP")
+    print("3: Iperf3 UDP (currently not working as expected)")
     print()
     return input()
 
@@ -66,24 +67,29 @@ def startPacketForwarding(network, language):
     if language == "2": # Python
         print("***** Python selected")
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
+        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
 
     if language == "3": # C
         print("***** C selected")
         h2.cmd('sudo gcc -pthread C/h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
-        
 
     if language == "4": # Go
         print("***** Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('chmod +x ./golang/forwardTraffic')
         h2.cmd('./golang/forwardTraffic &')
-    
+
     if language == "5": # Rust
         print("***** Rust selected")
         h2.cmd('cd rust')
         h2.cmd('cargo build --out-dir ./ -Z unstable-options')
         h2.cmd('./rust &')
+
+    if language == "6": #Python2
+        print("***** Python2 selected")
+        h2.cmd('sudo sysctl net.ipv4.ip_forward=0')
+        h2.cmd('sudo python2 python/python2_icmp_raw_MiddleHost.py &')
 
 
 def startEvaluation(network, evaluation):
