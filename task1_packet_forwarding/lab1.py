@@ -107,6 +107,8 @@ def startEvaluation(network, evaluation):
     if evaluation == "1":
         print("***** Evaluate Ping:")
         print()
+        # ping a little bit around to ignore high latency in the first packages
+        h1.cmd('ping '+h3_ip+' -c 50 -i 0.01 > /dev/null')
         print("h1 --> h3:")
         res = h1.cmd('ping '+h3_ip+' -c 100 -i 0.01')
         print(res)
@@ -118,6 +120,8 @@ def startEvaluation(network, evaluation):
     if evaluation == "2":
         print("***** Evaluate TCP Bandwith with iperf3:")
         print()
+        # ping a little bit around to ignore high latency in the first packages
+        h1.cmd('ping '+h3_ip+' -c 50 -i 0.01 > /dev/null')
         res1 = h1.cmd("iperf3 -s &")
         res3 = h3.cmd("iperf3 -c "+h1_ip)
         print("h1 output:")
@@ -128,6 +132,8 @@ def startEvaluation(network, evaluation):
     if evaluation == "3":
         print("***** Evaluate UDP Bandwith with iperf3:")
         print()
+        # ping a little bit around to ignore high latency in the first packages
+        h1.cmd('ping '+h3_ip+' -c 50 -i 0.01 > /dev/null')
         res1 = h1.cmd("iperf3 -s &")
         res3 = h3.cmd("iperf3 -u -c "+h1_ip)
         print("h1 output:")
