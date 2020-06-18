@@ -34,20 +34,20 @@ int main()
     char errbuf[100];
      
     //Open the device for sniffing
-    printf("Opening device h2-eth0");
+    //printf("Opening device h2-eth0");
     handle   = pcap_open_live("h2-eth0" , 65536 , 1 , 0 , errbuf);
-    printf("Opening device h2-eth1");
+    //printf("Opening device h2-eth1");
 	handle_2=pcap_open_live("h2-eth1" , 65536 , 1  , 0,  errbuf);
 
     if (handle == NULL) 
     {
-        fprintf(stderr, "Couldn't open h2-eth0 : %s\n" ,  errbuf);
+        //fprintf(stderr, "Couldn't open h2-eth0 : %s\n" ,  errbuf);
         exit(1);
     }
 	
 	if (handle_2 == NULL) 
     {
-        fprintf(stderr, "Couldn't open h2-eth1 : %s\n" ,  errbuf);
+        //fprintf(stderr, "Couldn't open h2-eth1 : %s\n" ,  errbuf);
         exit(1);
     }
 	
@@ -55,7 +55,7 @@ int main()
 	logfile=fopen("log.txt","w");
     if(logfile==NULL) 
     {
-        printf("Unable to create file.");
+        //printf("Unable to create file.");
     }
      
     //Put these 2 devices in sniff loop with threading
@@ -66,7 +66,7 @@ int main()
     pthread_join(tid,NULL);
     pthread_join(tid2,NULL);
 
-    printf("sniff done");
+    //printf("sniff done");
     return 0;   
 }
 
@@ -92,7 +92,7 @@ void process_packet2(u_char*args,const struct pcap_pkthdr*header, const u_char*b
     {
         case 1:  //ICMP Protocol
             ++icmp;
-	    printf("ICMP 1");
+	    //printf("ICMP 1");
 	    //modify_ethernet_header_2(buffer,size);
             pcap_inject(handle,buffer,size);
             break;
