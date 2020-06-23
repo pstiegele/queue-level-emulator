@@ -2,7 +2,9 @@ from Scheduler import Scheduler
 from collections import deque
 
 class FQScheduler(Scheduler):
-
+    """Fair Queueing scheduler is used for buffering output(not input like AQM)
+    quantum: maximum time slot that a process can be process  
+    """
     def __init__(self, queueManager, quantum):
         super(FQScheduler, self).__init__(queueManager)
         self.quantum = quantum

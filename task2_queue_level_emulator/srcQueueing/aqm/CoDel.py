@@ -16,14 +16,14 @@ class CoDel(AQM):
         self.queueName = queueName
 
         self.queue_size = 0
-
-        
+    
     def enqueue(self, queue_size, packet):
+        """set the time stamp for enqueueing a packet"""
         packet.setEnqueueTimestamp(time.time())
         return False
-
-    
+  
     def canDequeue(self, queue_size, packet):
+        """"""
         now = time.time()
         packet.setDequeueTimestamp(now)
         self.queue_size = queue_size

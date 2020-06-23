@@ -9,7 +9,9 @@ from dequeuemanager.DequeueManager import DequeueManager
 import json
 
 class QueueingSystem(object):
-
+"""
+Queueing system include EnqueueManager and DequeueManager
+"""
     def __init__(self, queueManagerDescription='', systemDescription=''):
         ECN = False
         self.queueManager = FQQueueManager()
@@ -28,6 +30,10 @@ class QueueingSystem(object):
        
     
     def insertPacket(self, packet):
+        """
+        Push a packet into Queue which is predefined as attribute in QueueManager class such as
+        FQQueueManager
+        """
         self.enqueueManager.insertPacket(packet)
 
     def log(self):
