@@ -1,6 +1,11 @@
 
 class Scheduler(object):
-
+    """
+    AQM is useful for buffering the incomming packets. Similarly, the scheduler is useful for
+    buffering the outgoing packet, since the transmission rate might be less than the processing rate.
+    User A---Input---Inputbuffer---switch processing time---Outputbuffer---Output---UserB 
+    Typical Scheduler: FIFO, Round Robin, Fair Queue
+    """
     def __init__(self, queueManager):
         self.queueManager = queueManager
 
@@ -19,3 +24,4 @@ class Scheduler(object):
                 This results in a unfair share if we only have one rate limiter in the vQueue    
         '''
         raise NotImplementedError( "Concrete class should have implemented this." )
+

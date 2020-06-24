@@ -1,7 +1,11 @@
 from Scheduler import Scheduler
 
 class RoundRobin(Scheduler):
+"""
+RoundRobin is a a scheduler for buffering output ports. It is fairer than 
+the simple FIFO strategy by not using priority. In contrast, it executes the packet cylicly cyclically
 
+"""
     def __init__(self, queueManager):
         super(RoundRobin, self).__init__(queueManager)
         self.lastQueue = -1
