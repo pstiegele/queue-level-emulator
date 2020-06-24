@@ -10,6 +10,7 @@ h1_ip = "10.0.0.1"
 h2_ip_eth0 = "10.0.0.2"
 h2_ip_eth1 = "10.0.0.2"
 h3_ip = "10.0.0.3"
+process_name = ""
 
 class ThreeHostsTopology(Topo):
     def __init__(self):
@@ -67,30 +68,35 @@ def startPacketForwarding(network, language):
        h2.cmd('sudo sysctl net.ipv4.ip_forward=0') #be sure that ip_forwarding is disabled
 
     if language == "2": # Python
-        print("***** Python selected")
+        print("***** Python3 selected")
         h2.cmd('sudo python3 python/icmp_raw_MiddleHost.py &')
+        process_name = "icmp_raw_MiddleHost.py"
 
     if language == "3": # C
         print("***** C selected")
         h2.cmd('cd C')
         h2.cmd('sudo gcc -pthread h2_forwarding.c -lpcap')
         h2.cmd('./a.out &')
+        process_name = "a.out"
 
     if language == "4": # Go
         print("***** Go selected")
         h2.cmd('/usr/local/go/bin/go build -o golang/ golang/src/forwardTraffic/forwardTraffic.go')
         h2.cmd('chmod +x ./golang/forwardTraffic')
         h2.cmd('./golang/forwardTraffic &')
+        process_name = "forwardTraffic"
 
     if language == "5": # Rust
         print("***** Rust selected")
         h2.cmd('cd rust')
         h2.cmd('cargo build --out-dir ./ -Z unstable-options')
         h2.cmd('./rust &')
+        process_name = "rust"
 
     if language == "6": #Python2
         print("***** Python2 selected")
         h2.cmd('sudo python2 python/python2_icmp_raw_MiddleHost.py &')
+        process_name = "python2_icmp_raw_MiddleHost.py"
 
 
 def startEvaluation(network, evaluation):
@@ -110,20 +116,20 @@ def startEvaluation(network, evaluation):
         # ping a little bit around to ignore high latency in the first packages
         h1.cmd('ping '+h3_ip+' -c 50 -i 0.01 > /dev/null')
         print("h1 --> h3:")
-        res = h1.cmd('ping '+h3_ip+' -c 100 -i 0.01')
+        res = h1.cmd('ping '+h3_ip+' -c 100000 -i 0.01')
         print(res)
-        print()
-        print("h3 --> h1:")
-        res = h3.cmd('ping '+h1_ip+' -c 100 -i 0.01')
-        print(res)
+        #print()
+        #print("h3 --> h1:")
+        #res = h3.cmd('ping '+h1_ip+' -c 100 -i 0.01')
+        #print(res)
 
     if evaluation == "2":
         print("***** Evaluate TCP Bandwith with iperf3:")
         print()
         # ping a little bit around to ignore high latency in the first packages
         h1.cmd('ping '+h3_ip+' -c 50 -i 0.01 > /dev/null')
-        res1 = h1.cmd("iperf3 -s &")
-        res3 = h3.cmd("iperf3 -c "+h1_ip)
+        res1 = h1.cmd("iperf3 -s -f m &")
+        res3 = h3.cmd("iperf3 -f m -O 10 -t 60 -c "+h1_ip)
         print("h1 output:")
         print(res1)
         print("h3 output:")
@@ -160,4 +166,8 @@ if __name__ == '__main__':
     net = Mininet(topo=ThreeHostsTopology(), autoSetMacs= True)
     startPacketForwarding(net, language)
     startEvaluation(net, evaluation)
-    CLI(net)
+    if evaluation == "0":
+        CLI(net)
+if process_name != "":
+    os.system("ps -C "+process_name+" -o pid=|xargs kill -9")
+

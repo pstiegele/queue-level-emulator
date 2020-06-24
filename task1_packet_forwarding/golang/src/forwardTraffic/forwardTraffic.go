@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Printf("golang package forwarding started!\n")
+	//fmt.Printf("golang package forwarding started!\n")
 	wg := new(sync.WaitGroup)
 	go receive("h2-eth0", []byte{0, 0, 0, 0, 0, 1}, []byte{0, 0, 0, 0, 0, 3}, "h2-eth1", 1, wg)
 	go receive("h2-eth1", []byte{0, 0, 0, 0, 0, 3}, []byte{0, 0, 0, 0, 0, 1}, "h2-eth0", 1, wg)
@@ -19,7 +19,7 @@ func main() {
 }
 
 func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInterface string, turnSendingOn int, wg *sync.WaitGroup){
-	fd, _ := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, 0x0300)
+	fd, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, 0x0300)
 	iface, _ := net.InterfaceByName(receiveInterface)
 	sa := syscall.SockaddrLinklayer{
 		Ifindex:  iface.Index,
@@ -47,21 +47,12 @@ func receive(receiveInterface string, srcMac []byte, destMac []byte, sendingInte
 		//}
 
 		if bytes.Equal(src, srcMac){
-			if bytes.Equal(dest, destMac) || bytes.Equal(dest, []byte{255, 255, 255, 255, 255, 255}) { //broadcast address changed to 254
+			if bytes.Equal(dest, destMac) || bytes.Equal(dest, []byte{255, 255, 255, 255, 255, 255}) { 
 				//fmt.Println("sending from ", src, " to ", dest)
-				send(buf[:n], &fd_sending)
+				syscall.Sendto(fd_sending, buf[:n], 0, sa_sending)
 			}
 		}
 
 	}
 	defer wg.Done()
-}
-
-
-
-func send(p []byte, fd *abc){
-	err = syscall.Sendto(*fd, p, 0, sa)
-	if err != nil {
-		log.Fatal("sendingInterface: ", sendingInterface, " | Sendto:", err)
-	}
 }
