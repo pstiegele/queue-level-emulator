@@ -49,7 +49,7 @@ func reset_nextDroptime()
 	next_Drop_time=time.now + 100 
 	dropped_count=1
 
-/*drop packet*/
+/*drop packet at HEAD of queue to inform sender earlier*/
 func drop()
 
 /*forward packet*/
