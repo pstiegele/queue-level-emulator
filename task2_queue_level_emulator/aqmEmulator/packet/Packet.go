@@ -1,13 +1,14 @@
 package packet
 
 type Packet struct {
-	data []byte
+	Data []byte
 	size int
 	enqueueTimestamp int
 	dequeueTimestamp int
 	//to be continued
 }
 
-func Create(data []byte)  {
-	//return Packet{data:data}
+func NewPacket(data []byte) *Packet  {
+	p := Packet{Data: data}
+	return &p
 }
