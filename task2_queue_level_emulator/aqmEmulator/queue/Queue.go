@@ -2,6 +2,7 @@ package queue
 
 import (
 	"aqmEmulator/packet"
+	//"log"
 )
 
 
@@ -22,6 +23,10 @@ func (q *Queue) Push(packet *packet.Packet) bool {
 	//Todo: what to do with Queue.size?
 	q.data = append(q.data, *packet)
 	//Todo: return correct result
+	//log.Println("*****queue start******")
+	//log.Println(q.data)
+	//log.Println("*****queue end******")
+	//log.Println("packet placed in queue")
 	return true
 }
 

@@ -24,7 +24,10 @@ The script should then ask for the desired implementation and evaluation method 
 
 ### Task 2 - Queue Level Emulator
 
-tbd
+You can just run the Queue Level Emulator including the creation of the topology by running `sudo python3 lab2.py` inside the *task2_queue_level_emulator* folder.
+
+To build the project manually, you need to have golang installed. Run `go install` inside of the *task2_queue_level_emulator/aqmEmulator* folder to install the Queue Level Emulator. After this you can run it by running `sudo ~/go/bin/aqmEmulator`
+
 
 ## Authors
 
