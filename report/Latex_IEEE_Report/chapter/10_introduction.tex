@@ -1,0 +1,28 @@
+The bandwidth requirements for Internet connections are steadily increasing - for example through the use of online video stream platforms with 4k streaming or the use of video telephony. A high data throughput is required to meet these requirements. However, if this reaches its capacity limit, a sophisticated approach is required to handle this limitation as best as possible. \newline
+One reason for bottlenecks can be a router on the way from the sender to the receiver: these only have a certain throughput. Typically, a router holds a queue for each interface in which newly arriving packets are inserted. But if more packets gets received than can be processed, this buffer will be filled up quickly. If the maximum number of bytes or packets (depending on the queue type) is reached, in the simple case the newly arriving packet gets dropped. This process is called drop tail and has some disadvantages. \newline
+One of them is, that the TCP sending rate will not decrease until packets gets dropped. And until the sender detects this, a certain time passes in which potentially many more packets gets dropped. \newline
+Other problems with the drop tail method are TCP global synchronization[ref] and bufferbloat[ref]. TCP global synchronization occurs when the buffer is full and packets from multiple TCP connections gets dropped. This leads to a synchronized decrease in the data throughput of each TCP connection, which leads to a periodic increase and decrease in the data throughput which corresponds to a non-ideal utilization of the possible data throughput. As we see in the Fig.1, the bandwidth can not be fully utilized and oscilate periodically. The bandwidth stays high in a very short amount of time, then it will go down again. As a result, the avarage bandwidth is very low.
+
+\begin{figure}[h]
+\centering
+\includegraphics*[width=8cm]{GlobalSynchronization}
+\caption{\em Global Synchronization}
+\label{fig:tcp}
+\end{figure}
+
+Bufferbloat occurs when the transmission of packets is delayed due to very large and already filled buffers. This can be a problem especially for time-critical applications such as VOIP telephony or gaming.\newline
+One of the reason which could lead to TCP global synchronization is the drop-tail queue discipline. Obviously, the drop-tail queue exibits a lot of disadvantages. When a packet at the tail of the queue is dropped, it takes a while until the sender detect the lost of this packet. During this time, the sender doesn't know yet and keeps sending more packet. As a result, the TCP global synchrnization will be triggered as mentioned earlier. An alternative to the classic drop tail procedure is active queue management (AQM)[ref]. In principle, AQM will drop the packet even if the queue is not full yet. Therefore it can combat against the buffer bloat and also TCP global synchronization. In other word, the latency and throughput will be improved. There are many AQM strategies, such as controlled delay(CoDel), random early detection(RED), proportional integral controller enhanced(PIE). AQM is realized by network scheduler[ref] in operating system. The network scheduler has the resonsibility to receive the packet, put them in the buffer for short time and send them in a specfic order depending on which queue algorithm is being used. Some queueing disciplines are already availible in modern operating system. For example, the linux kernel network scheduler has implemeted the fair queue codel (fq codel) as its default queueing algoritm. For ubuntu, we can check with command "tc qdisc show".\newline 
+As we have pointed out, there are so many queueing algoritms. Comparing the performance of these algorithm and choosing the best suitable algorithm for the application is nessessary task. In this work, we build a queue-simulator. The goal is to quickly evaluate the performance of many queue disciplines and compare the efficency as well as the disadvanges between them in the mininet enviroment[ref]. In general, this work consists of two phases. In phase 1 of the project, we have to choose the most efficent language to implement all of these queueing disciplines. This step will be discussed in detail in the section Approach below. After having the most efficent language for our scenario, we continue to the phase 2 which evaluates and compares the performance of various queueing disciplines such as Codel and PIE. The section III Approach below will cover this phase 2. Afterwards, the conclusion will be discused in section IV. \newline 
+
+\textcolor{red}{-alternative zu drop tail: Active Queue Management
+-was bedeutet AQM
+-was sind die grundlegenden Vorteile
+-was bauen wir: AQM Simulation um schnell verschiedene Methoden testen und in Sachen Übertragungslatenz und Geschwindigkeit evaluieren zu können und deren Vor- und Nachteile rauszufinden.
+Disadvantages of drop tail:\newline
+-tcp reduces sending rate only if packets get dropped: this will need some time to detect and in the meantime a lot of other packages will get eventually also dropped
+-global synchronization
+-penalizing buffer bloat}
+
+ 
+
+

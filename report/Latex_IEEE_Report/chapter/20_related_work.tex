@@ -1,0 +1,9 @@
+\textcolor{red}{Related work goes here}
+\subsection{P4-CoDel}
+CoDeL~\cite{nichols2013controlled} is considered at the queueing algorithm that can combat against Buffer Bloat~\cite{gettys2012bufferbloat}. Ralf et. al. have implemented CoDel queuing discipline with P4 language~\cite{bosshart2014p4} on programable data plane. The goal of this algorithm is to combat against bufferbloat. If we output rate is lower than the arival rate, then the queue will be filled up quickly by TCP protocol. As a result, the packet in the queue will be suffered from a long delay due to the long queue. Codel uses delay as a metric and make sure that packets stay in the queue with the delay below 5ms. The algorithm is shown in the figure 2. 
+\begin{figure}[h]
+\centering
+\includegraphics*[width=8cm]{codel}
+\caption{\em CoDel Queueing Discipline}
+\label{fig:tcp}
+\end{figure}

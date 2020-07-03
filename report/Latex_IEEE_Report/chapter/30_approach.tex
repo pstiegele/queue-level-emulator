@@ -1,0 +1,77 @@
+We use Mininet to create a network as quickly, easily and flexibly as possible. Mininet is a network emulation orchestration system with which you can create any number of hosts, switches, links and controllers - everything in software. And for the most part, they behave like the real hardware components. The process-based virtualization of Linux in combination with network namespaces is used for this. \newline
+In Mininet various topologies can be created. To implement our User Space Queue Level Emulator, we have created a topology with 3 hosts. Host 1 and Host 3 behave as clients, whereas Host 2 takes on the role of the forwarding package. 
+\textcolor{red}{grafik toplogie einfügen}
+\subsection{Design of the programming language evaluation}
+\textcolor{red}{-Mininet erklären
+-VM Umgebung erklären
+-Topology
+-
+-Aufteilung in Task1 und Task2 (und vielleicht Task3?)
+-Task1 erklären (beste Sprache finden (bzw. wenn 3 Tasks: Topology bauen)
+--wieso haben wir uns für diese Programmiersprachen entschieden?
+-Task2 erklären (Queue Level Simulator Implementierung)}
+
+\subsection{Implementation of the programming language evaluation}
+
+\subsection{Implementation of the active queue management evaluator}
+-codel explanation from pdf documentation
+\subsection{Implementation of the active queue management evaluator}
+
+\textcolor{red}{-Task1:
+--Skript erklären
+--Implementierung ip forward erklären
+---Topologie Abweichung bei ip forward erklären
+--Implementierung Python3 erklären
+--Implementierung C erklären
+--Implementierung Go erklären
+--Implementierung Rust erklären
+--Implementierung Python2 erklären}
+
+\subsection{Evaluation}
+Since all tests depend heavily on the available resources, all tests were carried out on the same system. For the same reason, the absolute results of the test are only of limited significance; the relative ratio is much more important, both when evaluating the fastest programming language for raw sockets and when evaluating the best active queue management algorithm.\\
+For our evaluations a virtual machine was used via Oracle's Virtualbox on which an Ubuntu 18.04. was installed. The system had access to 4GB RAM and 4 CPU cores, each with a base clock of 3.6 GHz (Turbo clock: 4.2 GHz, Ryzen 5 3600, CPU limit: 100percent).\\
+\subsubsection{Task 1: Evaluation of the fastest package forwarding language}
+The ICMP ping protocol was used to measure the latency between sender and receiver, to measure the maximum bandwidth the tool iperf3 was used.\\
+\underline{Ping}\\
+\begin{figure}[h]
+\centering
+\includegraphics*[width=9cm]{ping}
+\caption{\em Ping RTT duration per language}
+\label{fig:ping}
+\end{figure}
+
+
+\underline{TCP}\\
+\begin{figure}[h]
+\centering
+\includegraphics*[width=9cm]{tcp}
+\caption{\em TCP bandwidth per language}
+\label{fig:tcp}
+\end{figure}
+
+\textcolor{red}{Allgemeine Ausgangssituation: 
+Testskript welches Topology erzeugt und anschließend gewünschten Forwarder in der jeweiligen Sprache startet. Danach kann gewählt werden, welcher Test durchgeführt werden soll. 
+-Abhängig von PC auf dem getestet wird: Deswegen nur relative Vergleiche möglich 
+-In VM auf Ubuntu getestet
+Ping
+-Ping erklären (was ist Ping, wie funktioniert es, welche Pakete werden exakt verschickt, arp request vor ICMP Pakete, welche Parameter werden genutzt bzw sind vorhanden, vlt ein Paket zeigen?)
+-
+Ausgangssituation:
+	- Anfangs ist die Verbindung immer langsam (wieso?, z.B. ARP, aber ist zb auch beim 2. oder 3. Ping noch recht langsam, irgendwo stand mal was das liegt an Mininet und dem Controller). Um deswegen diesen Anfangs Bios zu eliminieren werden 50 Pings testweise verschickt die nicht in die Evaluation mit eingehen
+	- Zur Auswertung werden 100 000 Pings verschickt per ping-Kommando von h1 zu h3 in einem Interval von 0.01s
+Ergebnis:
+-dpdk?
+Ergebnisse in Grafik visualisieren, mit min, avg und max
+Ipforward
+Python3
+C	
+Go	
+Rust	
+Python2	
+TCP
+-iperf3 erklären (was ist iperf3, wie funktioniert es, welche Pakete werden verschickt, welche Parameter werden genutzt), von welcher Seite zu welcher Seite gesendet wird, wieso nur in die eine Richtung getestet wird. Welche Optionen wurden gesetzt (z.b. -O um ersten paar Sekunden und somit TCP Slowstart auszublenden)
+-Auswertung der verschiedenen Sprachen über die Zeit
+-UDP Auswertung
+-TCP Auswertung Standardabweichung hinzufügen
+Ausgangssituation:
+Ergebnisse:}
