@@ -15,7 +15,7 @@ type ForwardingRules struct {
 	Dest []byte
 }
 
-func NewReceiver(wg *sync.WaitGroup, receiverInterface string, queue *queue.Queue, fr ForwardingRules, receivedPackets *int ) {
+func NewReceiver(wg *sync.WaitGroup, m sync.Mutex, receiverInterface string, queue *queue.Queue, fr ForwardingRules, receivedPackets *int ) {
 	fd, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, 0x0300)
 	iface, _ := net.InterfaceByName(receiverInterface)
 	sa := syscall.SockaddrLinklayer{
@@ -25,8 +25,6 @@ func NewReceiver(wg *sync.WaitGroup, receiverInterface string, queue *queue.Queu
 	if err != nil {
 		log.Fatal("receive error occured: ", err)
 	}
-
-
 
 	syscall.Bind(fd, &sa)
 
@@ -40,12 +38,16 @@ func NewReceiver(wg *sync.WaitGroup, receiverInterface string, queue *queue.Queu
 		//create packet here
 		//log.Println(buf[:n])
 		p := packet.NewPacket(buf[:n])
+		
+		//p := packet.NewPacket([]byte{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1, 2, 3, 4, 5, 6, 7, 8, 9})
 		_, _, _, _ = buf, n, dest, src
 		//put packet here into the queue
 		if(needsforwarding(p, fr)){
 			//log.Println("packet received --> needsForwarding")
 			*receivedPackets++;
+			m.Lock()
 			queue.Push(p)
+			m.Unlock()
 		}else{
 			//log.Println("packet received --> dropped")
 		}

@@ -22,12 +22,21 @@ To run the script simply cd into the *task1_packet_forwarding* folder and run
 
 The script should then ask for the desired implementation and evaluation method and finally output the result.
 
-### Task 2 - Queue Level Emulator
+### Task 2 - Active Queue Level Emulator
 
-You can just run the Queue Level Emulator including the creation of the topology by running `sudo python3 lab2.py` inside the *task2_queue_level_emulator* folder.
+You can start the topology by running `sudo python3 lab2.py` inside the *task2_queue_level_emulator* folder. After running this, the Mininet CLI starts and you can type in `xterm h1 h2 h3` to open a console for every host. 
+Then you can build and start the Active Queue Level Emulator inside the h2 console window by running `./buildAndRun.sh`. 
+When you do not have golang installed, try to just run the executable: `cd aqmEmulator;./aqmEmulator`
 
-To build the project manually, you need to have golang installed. Run `go install` inside of the *task2_queue_level_emulator/aqmEmulator* folder to install the Queue Level Emulator. After this you can run it by running `sudo ~/go/bin/aqmEmulator`
+To build the project manually, you need to have golang installed. Run this command inside the aqmEmulator folder: `/usr/local/go/bin/go build -o ./ aqmEmulator.go`, mark the file as executable by running `chmod +x ./aqmEmulator` and start the program by running `./aqmEmulator`
 
+To install the Active Queue Level Emulator run `go install` inside of the *task2_queue_level_emulator/aqmEmulator* folder. After this you can run it with `sudo ~/go/bin/aqmEmulator`
+
+h2.cmd('cd aqmEmulator')
+    h2.cmd('/usr/local/go/bin/go build -o ./ aqmEmulator.go')
+    #print("***** run aqm emulator")
+    h2.cmd('chmod +x ./aqmEmulator')
+    #h2.cmd('./aqmEmulator &')
 
 ## Authors
 

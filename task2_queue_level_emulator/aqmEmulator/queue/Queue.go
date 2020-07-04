@@ -3,7 +3,11 @@ package queue
 import (
 	"aqmEmulator/packet"
 	"time"
-	//"log"
+	// "os"
+	// "encoding/json"
+	// "strconv"
+	// "bytes"
+	"log"
 )
 
 //todo: add synchronization because of threads
@@ -24,6 +28,20 @@ func NewQueue(maxSize int, currentQueueSize *int) *Queue{
 func (q *Queue) Push(packet *packet.Packet) bool {
 	//Todo: check if queue is full
 	//Todo: what to do with Queue.size?
+
+	
+	if(packet.Data == nil){
+		log.Println("ALLAAARRRMMMMM")
+	}
+
+	if(len(packet.Data) == 0){
+		log.Println("ALLAAARRRMMMMM")
+	}
+
+	if(len(packet.Data) < 10){
+		log.Println("ALLAAARRRMMMMM")
+	}
+
 	if(*q.size+1>q.maxSize){
 		return false
 	}
@@ -32,6 +50,26 @@ func (q *Queue) Push(packet *packet.Packet) bool {
 	*q.size += 1
 	//log.Println("package enqueued")
 	//Todo: return correct result
+	// go func(q *Queue){
+	// 	arr := make([]string, 0, 1000000)
+	// 	for _, element := range q.data {
+	// 			out, _ := json.Marshal(element)
+	// 			arr = append(arr, string(out))
+	// 	}
+	// 	//log.Println(arr)
+	// 	var buffer bytes.Buffer
+	// 	for _, arrelement := range arr {
+	// 		buffer.WriteString(arrelement+"\n\n")
+	// 	}
+	// 	if(len(arr)!=0){
+	// 		f, _ := os.Create("/home/pstiegele/log/"+strconv.Itoa(int(time.Now().UnixNano())))
+	// 	defer f.Close()
+	// 	f.WriteString(buffer.String())
+	// 	f.Sync()
+	// 	}
+	// }(q)
+	
+	
 	return true
 }
 
@@ -41,6 +79,9 @@ func (q *Queue) NextPacketSize() int {
 		return 0
 	}
 	size := q.data[0].Size
+	if(size == 0){
+		q.Pop()
+	}
 	return size
 }
 

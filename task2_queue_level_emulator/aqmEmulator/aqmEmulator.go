@@ -9,6 +9,7 @@ import (
 	"aqmEmulator/scheduler"
 	"sync"
 	"time"
+	//"log"
 	tm "github.com/buger/goterm"
 )
 
@@ -18,6 +19,8 @@ func main(){
 	fmt.Println("AQM Emulator started")
 	//waitgroup waits for every go routine (=thread) to finish
 	wg := new(sync.WaitGroup)
+	var m0 sync.Mutex
+	var m1 sync.Mutex
 
 	//interface names
 	iface0 := "h2-eth0"
@@ -62,20 +65,27 @@ func main(){
 	sender1 := sender.NewSender(iface1, &sentPackets1)
 
 	//create scheduler to pop packets out of the queue and give them over to the sender
-	go scheduler.NewScheduler(wg, queue0, sender0, aqm0, &bucketSize0, maxBucketSize)
-	go scheduler.NewScheduler(wg, queue1, sender1, aqm1, &bucketSize1, maxBucketSize)
+	go scheduler.NewScheduler(wg, m0, queue0, sender0, aqm0, &bucketSize0, maxBucketSize)
+	go scheduler.NewScheduler(wg, m1, queue1, sender1, aqm1, &bucketSize1, maxBucketSize)
 
 	//start thread0 h1 -> h3 here
-	go receiver.NewReceiver(wg, iface0, queue1, createForwardingRules(0), &receivedPackets0)
+	go receiver.NewReceiver(wg, m1, iface0, queue1, createForwardingRules(0), &receivedPackets0)
 	//start thread1 h3 -> h1 here
-	go receiver.NewReceiver(wg, iface1, queue0, createForwardingRules(1), &receivedPackets1)
+	go receiver.NewReceiver(wg, m0, iface1, queue0, createForwardingRules(1), &receivedPackets1)
 
 
 	wg.Add(4)
 
 	tm.Clear()
 	i := 0
+	//d := false
 	for{
+		// if(currentQueueSize0>20&&d==false){
+		// 	p := queue0.Pop()
+		// 	log.Println()
+		// 	log.Println(p)
+		// 	d=true
+		// }
 		tm.MoveCursor(1,1)
 		
 		heading := "AQM Emulator is running"
