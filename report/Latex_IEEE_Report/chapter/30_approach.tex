@@ -1,21 +1,37 @@
 We use Mininet to create a network as quickly, easily and flexibly as possible. Mininet is a network emulation orchestration system with which you can create any number of hosts, switches, links and controllers - everything in software. And for the most part, they behave like the real hardware components. The process-based virtualization of Linux in combination with network namespaces is used for this. \newline
-In Mininet various topologies can be created. To implement our User Space Queue Level Emulator, we have created a topology with 3 hosts. Host 1 and Host 3 behave as clients, whereas Host 2 takes on the role of the forwarding package. 
+In Mininet various topologies can be created. To implement our User Space Queue Level Emulator, we have created a topology with 3 hosts as shown in the figure 3. Host 1 and host 3 behave as clients, whereas host 2 takes on the role of buffering and forwarding package and our CoDel queue discipline has been implemented at host 2. As metioned ealier, our work consists of two phases. In phase 1, we compare the performance of various languages and choose the suitable one, which will be used in phase 2 to implement the queueing discipline. 
 \textcolor{red}{grafik toplogie einfügen}
-\subsection{Design of the programming language evaluation}
+
+\subsection{Phase 1: Language evaluation}
+\subsubsection{Design of the topology for programming language evaluation}
+A typical comminication must have at least two hosts, one for sending and the other for receiving. But if the sending rate is higher than the receving rate, then packet dropping will be taking place. There must be a buffer in the middle to prevent such a scenarios from happening. Therefore, we're comming up with the simplified topology which consists of two host as clients and another host in the middle for buffering and forwarding purposes as shown in the figure 3. Host 1 can communicate with host 3 only via host 2 and vice versa.
 \textcolor{red}{-Mininet erklären
 -VM Umgebung erklären
 -Topology
--
 -Aufteilung in Task1 und Task2 (und vielleicht Task3?)
 -Task1 erklären (beste Sprache finden (bzw. wenn 3 Tasks: Topology bauen)
 --wieso haben wir uns für diese Programmiersprachen entschieden?
 -Task2 erklären (Queue Level Simulator Implementierung)}
 
-\subsection{Implementation of the programming language evaluation}
+\subsubsection{The programming language evaluation}
+At first, host 1 and host 3 will use host 2 as the forwarding node. This can be configured with the command \textit{sudo sysctl net.ipv4.ip\_forward = 1} at host 2 and  $sudo ip route add default via 'host2_ip' dev 'h1 interface/h3 interface'$ at host 2 and host 3. With this configuration, the packet from host 1 will be forwarded to host 3 and vice versa by linux kernel of host 2 without writing any programming. Since there is no packet processing involved in this process, the throughput is very high as shown in the figure 4. In other word, this forwarding task is done by linux kernel. Now we come up the the idea to emulate this forwarding functionality without using the linux kernel. In other word, this forwarding functionality is disable with the command $sudo sysctl net.ipv4.ip_forward=0$. Now the packet comming from host 1 will not be automatically forwarded to host 3. To be able forward the packet, we need a simple forwarding programm running at host 2. Therefore, the same forwarding task will be written in different languages and executed at host 2.
 
-\subsection{Implementation of the active queue management evaluator}
+\subsubsection{Implementation of the packet forwarding programm}
+As we have discussed earlier, a forwarding programm must be executed at host 2 to serve the communication between host 1 and host 3. This simple forwarding is structure as we see in the figure 5. All of the implementation of each language must follow this structure. \textcolor{red}{grafik einfügen, 2 interface sniff with 2 thread, if there is a packet at buffer, then get the packet and send to other interface}. In this figure, we can see that host 2 has two interfaces. Therefore, we bind two sockets to these two interfaces to be able to sniff the traffic. Unlike the usual socket, which usally strips off the header field and sends only data to the application. As the name suggests, raw socket instead doens't strip off the header field. Therefore, the application can receive both data and header fields such as MAC address and IP adress. Indeed, the application layer can manipulate these header fields such as modifying the destination address and so on. This is the advantage of using raw socket. Basically we have two thread running all the time in the endless loop. Each socket will be assigned to each thread. Each thread ca n therefore continously sniff the traffic at the interface that it's been attached to. Since we have two interfaces at host 2, we must have two threads. Every time a packet is deteted at any interface's buffer, we pop them out of the buffer and send to the other interface. In other word, every thing arrives at interface 1 will be forwarded to the interface 2 and vice versa. Now the forwarding programm is running at host 2 and host 1 and host 3 can be able to talk to each other.
+
+\subsubsection{Set up enviroment for evaluation}
+Now we can test our forwarding for programm by simply ping from host 1 to host 3 or vice versa. The round-trip-time then was captured and presented in the figure 3. Similarly, the throughput was also measured by iperf3 tool, which is widely used and avalible in various operating system. Since all tests depend heavily on the available resources. In other word, different computer running the test will result different numbers and it's not reliable. To get rid of this problem, all tests were carried out on the same system. For the same reason, the absolute results of the test are only of limited significance; the relative ratio is much more important, both when evaluating the fastest programming language for raw sockets and when evaluating the best active queue management algorithm.\\
+For our evaluations a virtual machine was used via Oracle's Virtualbox on which an Ubuntu 18.04. was installed. The system had access to 4GB RAM and 4 CPU cores, each with a base clock of 3.6 GHz (Turbo clock: 4.2 GHz, Ryzen 5 3600, CPU limit: 100percent).\\
+
+
+\subsubsection{Comparing performance and choosing the suitable one}
+Now we can test our forwarding for programm by simply ping from host 1 to host 3 or vice versa. The round-trip-time then was captured and presented in the figure 3. Similarly, the throughput was also measured by iperf3 tool, which is widely used and avalible in various operating system. Of course, the performance is not the same for all languages as we can see in the figure 4. Rust and python exibits a very poor performance while Go on the other hand has a very good performance. Therefore, we choose Golang as a suitable languegue which is used in our phase 2 of the project.
+
+
+\subsection{Phase 2: Implementation of the active queue management with Golang}
+\subsubsection{Implementation of the active queue management evaluator}
 -codel explanation from pdf documentation
-\subsection{Implementation of the active queue management evaluator}
+
 
 \textcolor{red}{-Task1:
 --Skript erklären
@@ -27,9 +43,7 @@ In Mininet various topologies can be created. To implement our User Space Queue 
 --Implementierung Rust erklären
 --Implementierung Python2 erklären}
 
-\subsection{Evaluation}
-Since all tests depend heavily on the available resources, all tests were carried out on the same system. For the same reason, the absolute results of the test are only of limited significance; the relative ratio is much more important, both when evaluating the fastest programming language for raw sockets and when evaluating the best active queue management algorithm.\\
-For our evaluations a virtual machine was used via Oracle's Virtualbox on which an Ubuntu 18.04. was installed. The system had access to 4GB RAM and 4 CPU cores, each with a base clock of 3.6 GHz (Turbo clock: 4.2 GHz, Ryzen 5 3600, CPU limit: 100percent).\\
+
 \subsubsection{Task 1: Evaluation of the fastest package forwarding language}
 The ICMP ping protocol was used to measure the latency between sender and receiver, to measure the maximum bandwidth the tool iperf3 was used.\\
 \underline{Ping}\\
