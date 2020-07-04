@@ -36,6 +36,7 @@ func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *
 		//log.Printf("next packet size: %d", nextPacketSize)
 		
 		if(nextPacketSize != 0 && nextPacketSize < *bucket){
+			*bucket -= nextPacketSize
 			//log.Println("scheduler takes packet out of queue")
 			m.Lock()
 			p := queue.Pop()
