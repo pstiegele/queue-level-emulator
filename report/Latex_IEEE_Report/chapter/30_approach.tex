@@ -1,52 +1,25 @@
 We use Mininet to create a network as quickly, easily and flexibly as possible. Mininet is a network emulation orchestration system with which you can create any number of hosts, switches, links and controllers - everything in software. And for the most part, they behave like the real hardware components. The process-based virtualization of Linux in combination with network namespaces is used for this. \newline
-In Mininet various topologies can be created. To implement our User Space Queue Level Emulator, we have created a topology with 3 hosts as shown in the figure 3. Host 1 and host 3 behave as clients, whereas host 2 takes on the role of buffering and forwarding package and our CoDel queue discipline has been implemented at host 2. As metioned ealier, our work consists of two phases. In phase 1, we compare the performance of various languages and choose the suitable one, which will be used in phase 2 to implement the queueing discipline. 
-\textcolor{red}{grafik toplogie einfügen}
+In Mininet various topologies can be created. To implement our User Space Queue Level Emulator, we have created a topology with 3 hosts as shown in the figure 3. Host 1 and host 3 behave as clients, whereas host 2 takes on the role of buffering and forwarding package and our CoDel queue discipline has been implemented at host 2. As metioned ealier, our work consists of two phases. In phase 1, we compare the performance of various languages and choose the suitable one, which will be used in phase 2 to implement the queueing discipline.
+
 
 \subsection{Phase 1: Language evaluation}
 \subsubsection{Design of the topology for programming language evaluation}
 A typical comminication must have at least two hosts, one for sending and the other for receiving. But if the sending rate is higher than the receving rate, then packet dropping will be taking place. There must be a buffer in the middle to prevent such a scenarios from happening. Therefore, we're comming up with the simplified topology which consists of two host as clients and another host in the middle for buffering and forwarding purposes as shown in the figure 3. Host 1 can communicate with host 3 only via host 2 and vice versa.
-\textcolor{red}{-Mininet erklären
--VM Umgebung erklären
--Topology
--Aufteilung in Task1 und Task2 (und vielleicht Task3?)
--Task1 erklären (beste Sprache finden (bzw. wenn 3 Tasks: Topology bauen)
---wieso haben wir uns für diese Programmiersprachen entschieden?
--Task2 erklären (Queue Level Simulator Implementierung)}
+\begin{figure}[h]
+\centering
+\includegraphics*[width=9cm]{topology}
+\caption{\em Host 2 buffers and forwards packet with interface 0 on the left side and interface 1 on the right side}
+\end{figure} 
 
 \subsubsection{The programming language evaluation}
-At first, host 1 and host 3 will use host 2 as the forwarding node. This can be configured with the command \textit{sudo sysctl net.ipv4.ip\_forward = 1} at host 2 and  $sudo ip route add default via 'host2_ip' dev 'h1 interface/h3 interface'$ at host 2 and host 3. With this configuration, the packet from host 1 will be forwarded to host 3 and vice versa by linux kernel of host 2 without writing any programming. Since there is no packet processing involved in this process, the throughput is very high as shown in the figure 4. In other word, this forwarding task is done by linux kernel. Now we come up the the idea to emulate this forwarding functionality without using the linux kernel. In other word, this forwarding functionality is disable with the command $sudo sysctl net.ipv4.ip_forward=0$. Now the packet comming from host 1 will not be automatically forwarded to host 3. To be able forward the packet, we need a simple forwarding programm running at host 2. Therefore, the same forwarding task will be written in different languages and executed at host 2.
+At first, host 1 and host 3 will use host 2 as the forwarding node. This can be configured with the command \textit{sysctl net.ipv4.ip\_forward = 1} at host 2 and \textit{sudo ip route add default via host2\_ip dev h1 interface/h3 interface} at host 2 and host 3. With this configuration, the packet from host 1 will be forwarded to host 3 and vice versa by linux kernel of host 2 without writing any programming. Since there is no packet processing involved in this process, the throughput is very high as shown in the figure 4. In other word, this forwarding task is done by linux kernel. Now we come up the the idea to emulate this forwarding functionality without using the linux kernel. In other word, this forwarding functionality is disable with the command \textit{sudo sysctl net.ipv4.ip\_forward =0}. Now the packet comming from host 1 will not be automatically forwarded to host 3. To be able forward the packet, we need a simple forwarding programm running at host 2. Therefore, the same forwarding task will be written in different languages and executed at host 2.
 
 \subsubsection{Implementation of the packet forwarding programm}
-As we have discussed earlier, a forwarding programm must be executed at host 2 to serve the communication between host 1 and host 3. This simple forwarding is structure as we see in the figure 5. All of the implementation of each language must follow this structure. \textcolor{red}{grafik einfügen, 2 interface sniff with 2 thread, if there is a packet at buffer, then get the packet and send to other interface}. In this figure, we can see that host 2 has two interfaces. Therefore, we bind two sockets to these two interfaces to be able to sniff the traffic. Unlike the usual socket, which usally strips off the header field and sends only data to the application. As the name suggests, raw socket instead doens't strip off the header field. Therefore, the application can receive both data and header fields such as MAC address and IP adress. Indeed, the application layer can manipulate these header fields such as modifying the destination address and so on. This is the advantage of using raw socket. Basically we have two thread running all the time in the endless loop. Each socket will be assigned to each thread. Each thread ca n therefore continously sniff the traffic at the interface that it's been attached to. Since we have two interfaces at host 2, we must have two threads. Every time a packet is deteted at any interface's buffer, we pop them out of the buffer and send to the other interface. In other word, every thing arrives at interface 1 will be forwarded to the interface 2 and vice versa. Now the forwarding programm is running at host 2 and host 1 and host 3 can be able to talk to each other.
+As we have discussed earlier, a forwarding programm must be executed at host 2 to serve the communication between host 1 and host 3. All of the implementation of each language have the same structure. This simple forwarding is structure as follow. In this figure 3, we can see that host 2 has two interfaces. Therefore, we bind two sockets to these two interfaces to be able to sniff the traffic. Unlike the usual socket, which usally strips off the header field and sends only data to the application. As the name suggests, raw socket instead doens't strip off the header field. Therefore, the application can receive both data and header fields such as MAC address and IP adress. Indeed, the application layer can manipulate these header fields such as modifying the destination address and so on. This is the advantage of using raw socket. Basically we have two thread running all the time in the endless loop at host 2. Each socket will be assigned to each thread. Each thread ca n therefore continously sniff the traffic at the interface that it's been attached to. Since we have two interfaces at host 2, we must have two threads. Every time a packet is deteted at any interface's buffer, we pop them out of the buffer and send to the other interface. In other word, every thing arrives at interface 1 will be forwarded to the interface 2 and vice versa. Now the forwarding programm is running at host 2 and host 1 and host 3 can be able to talk to each other.
 
 \subsubsection{Set up enviroment for evaluation}
 Now we can test our forwarding for programm by simply ping from host 1 to host 3 or vice versa. The round-trip-time then was captured and presented in the figure 3. Similarly, the throughput was also measured by iperf3 tool, which is widely used and avalible in various operating system. Since all tests depend heavily on the available resources. In other word, different computer running the test will result different numbers and it's not reliable. To get rid of this problem, all tests were carried out on the same system. For the same reason, the absolute results of the test are only of limited significance; the relative ratio is much more important, both when evaluating the fastest programming language for raw sockets and when evaluating the best active queue management algorithm.\\
 For our evaluations a virtual machine was used via Oracle's Virtualbox on which an Ubuntu 18.04. was installed. The system had access to 4GB RAM and 4 CPU cores, each with a base clock of 3.6 GHz (Turbo clock: 4.2 GHz, Ryzen 5 3600, CPU limit: 100percent).\\
-
-
-\subsubsection{Comparing performance and choosing the suitable one}
-Now we can test our forwarding for programm by simply ping from host 1 to host 3 or vice versa. The round-trip-time then was captured and presented in the figure 3. Similarly, the throughput was also measured by iperf3 tool, which is widely used and avalible in various operating system. Of course, the performance is not the same for all languages as we can see in the figure 4. Rust and python exibits a very poor performance while Go on the other hand has a very good performance. Therefore, we choose Golang as a suitable languegue which is used in our phase 2 of the project.
-
-
-\subsection{Phase 2: Implementation of the active queue management with Golang}
-\subsubsection{Implementation of the active queue management evaluator}
--codel explanation from pdf documentation
-
-
-\textcolor{red}{-Task1:
---Skript erklären
---Implementierung ip forward erklären
----Topologie Abweichung bei ip forward erklären
---Implementierung Python3 erklären
---Implementierung C erklären
---Implementierung Go erklären
---Implementierung Rust erklären
---Implementierung Python2 erklären}
-
-
-\subsubsection{Task 1: Evaluation of the fastest package forwarding language}
-The ICMP ping protocol was used to measure the latency between sender and receiver, to measure the maximum bandwidth the tool iperf3 was used.\\
-\underline{Ping}\\
 \begin{figure}[h]
 \centering
 \includegraphics*[width=9cm]{ping}
@@ -55,13 +28,55 @@ The ICMP ping protocol was used to measure the latency between sender and receiv
 \end{figure}
 
 
-\underline{TCP}\\
 \begin{figure}[h]
 \centering
 \includegraphics*[width=9cm]{tcp}
 \caption{\em TCP bandwidth per language}
 \label{fig:tcp}
 \end{figure}
+
+
+\subsubsection{Comparing performance and choosing the suitable one}
+Now we can test our forwarding for programm by simply ping from host 1 to host 3 or vice versa. The round-trip-time then was captured and presented in the figure 3. Similarly, the throughput was also measured by iperf3 tool, which is widely used and avalible in various operating system. Of course, the performance is not the same for all languages as we can see in the figure 4. Rust and python exibits a very poor performance while Go on the other hand has a very good performance. Therefore, we choose Golang as a suitable languegue which is used in our phase 2 of the project.
+
+
+
+
+
+\subsection{Phase 2: Implementation of the active queue management with Golang}
+\subsubsection{Implementation of the active queue management and rate limiter}
+Now we implement the AQM with Golang. The Codel queueing discipline will be implemented. As we discussed earlier in the above section Related Work how the algorithm works, we are not discussing the CoDel anymore in this section. The same CoDel algorithm will be realized here in this section with Golang. For the rate limiter, we use \textit{token bucket} traffic shaper to limit the transmition rate. The token bucket works as shown in the figure 6. If the sender wants to transmit data, he has to have a sufficent amount of tokens. But there are only a limit number of tokens which are generated for each time slot. In other words, if the sends want to send data but there is no tokens left, then he has to wait until next time slot. Because of that we can reduce the sending rate. There is one more thing that needs to take into account. As the name suggests, we have here a bucket which has a limit capacity. Whenever tokens are generated, they will be put into this bucket. If there is no data to be sent, the tokens will quickly fill up the bucket. If the bucket has reached its capacity, then the generated tokens will not be put into the bucket anymore. In summary, the size of the bucket and the token's generated rate will shape the sending rate. Obviously, these two parameters are adjustable and can therefore be adapted to fit our needs. 
+\begin{figure}[h]
+\centering
+\includegraphics*[width=9cm]{tokenbucket}
+\caption{\em Token Bucket traffic shaping principle}
+\label{fig:tcp}
+\end{figure}
+
+\subsubsection{Structure of the code base}
+The general steps of our Golang code base is shown in the figure \textcolor{red}(einfügen figure für Code Base: scheduler class, AQM class, Send/reciever class, main function). To be albe to realized this programm, there are 5 main classes in our implemention:
+\begin{description}
+  \item[$\bullet$] Sender class.
+  \item[$\bullet$] Receiver class.
+   \item[$\bullet$] AQM class.
+   \item[$\bullet$] Scheduler class.
+   \item[$\bullet$] Queue class.	
+   
+\end{description}
+Receiver and Sender class are responsible to sniff the traffic with raw socket, put it in the queue and forward the packet based on the AQM's decision. Queue class is where the queue buffer is located and it also should capture the timestamp of the packet whenerver a packet is enqueued in the buffer. AQM class is where the CoDel queueing discipline is implemented. The scheduler class is the place where we implemented Token Bucket. As we can see in the figure 7, this scheduler will be executed in a unfinite loop. In this loop, the dequeue request will be continously generated. Everytime a deuque request arrives, we first check the rate limiter if there are sufficient tokens inside the bucket. If there is enough amout of tokens available inside the bucket, it must call the AQM function for further decision. As we showed in the section Related Work, there are two possible actions after calling AQM. The first one is to dequeue the packet out of the queue. And the second possibility is to drop this packet if it violates two conditions that haven been shown in the figure 2. 
+\begin{figure}[h]
+\centering
+\includegraphics*[width=9cm]{codebase}
+\caption{\em General step of code base}
+\label{fig:tcp}
+\end{figure}
+
+
+
+\subsubsection{Result}
+
+
+
 
 \textcolor{red}{Allgemeine Ausgangssituation: 
 Testskript welches Topology erzeugt und anschließend gewünschten Forwarder in der jeweiligen Sprache startet. Danach kann gewählt werden, welcher Test durchgeführt werden soll. 
