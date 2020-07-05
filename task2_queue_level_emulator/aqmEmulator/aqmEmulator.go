@@ -27,13 +27,13 @@ func main(){
 	iface1 := "h2-eth1"
 
 	//maximum size of packets inside a queue
-	maxQueueSize := 10000
+	maxQueueSize := 1000000
 
 	//scheduler tokenbucket vars
 	var bucketSize0 int64 = 0
 	var bucketSize1 int64 = 0
 	//maximum size in bytes of scheduler tokenbucket (ratelimiter)
-	var maxBucketSize int64 = 10000
+	var maxBucketSize int64 = 1000000
 
 	//vars for the active queue management
 	var aqmInterval int64 = 100000000

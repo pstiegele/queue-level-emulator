@@ -13,7 +13,7 @@ import (
 func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *sender.Sender, aqm *aqm.Aqm, bucket *int64, maxBucketSize int64) {
 	//todo: parameter auslagern
 	//todo: time sleep einfügen und auslagern
-	tokenGenerationRate := 0.001
+	tokenGenerationRate := 0.1
 	*bucket = maxBucketSize
 	var lastTokenUpdate int64 = time.Now().UnixNano()
 
@@ -36,7 +36,6 @@ func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *
 		//log.Printf("next packet size: %d", nextPacketSize)
 		
 		if(nextPacketSize != 0 && nextPacketSize < *bucket){
-			*bucket -= nextPacketSize
 			//log.Println("scheduler takes packet out of queue")
 			m.Lock()
 			p := queue.Pop()
@@ -44,6 +43,7 @@ func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *
 			if p != nil{
 				if(aqm.SendingOk(p)){
 					//log.Println("aqm says its ok to send, so transport the packet to the sender")
+					*bucket -= nextPacketSize
 					sender.Send(p)
 				}
 				
