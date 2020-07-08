@@ -53,7 +53,9 @@ func (aqm *Aqm) SendingOk(p *packet.Packet) bool{
 	// log.Println("nextDropTime: ")
 	// log.Println(aqm.nextDropTime)
 	deltaT := p.DequeueTimestamp-p.EnqueueTimestamp
-	*aqm.currentAverageDeltaT = float64(*aqm.currentAverageDeltaT)*0.95+float64(deltaT)*0.05
+	//*aqm.currentAverageDeltaT = float64(*aqm.currentAverageDeltaT)*0.95+float64(deltaT)*0.05
+	*aqm.currentAverageDeltaT = float64(deltaT)
+	//log.Println(*aqm.currentAverageDeltaT)
 	if (deltaT > aqm.target){
 		if (time.Now().UnixNano() < aqm.nextDropTime){
 			//forward_packet();

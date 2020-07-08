@@ -22,7 +22,7 @@ func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *
 		deltaT :=  now - lastTokenUpdate
 		//log.Printf("deltaT: %d", deltaT)
 		lastTokenUpdate = now
-		newTokens := int64(float64(deltaT) * tokenGenerationRate)
+		newTokens := int64(float64(deltaT) * float64(tokenGenerationRate))
 		//log.Printf("newTokens: %d", newTokens)
 		if(*bucket + newTokens > maxBucketSize){
 			*bucket = maxBucketSize

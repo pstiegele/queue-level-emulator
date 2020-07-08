@@ -27,17 +27,17 @@ func main(){
 	iface1 := "h2-eth1"
 
 	//maximum size of packets inside a queue
-	maxQueueSize := 1000000
+	var maxQueueSize int = 1e6
 
 	//scheduler tokenbucket vars
 	var bucketSize0 int64 = 0
 	var bucketSize1 int64 = 0
 	//maximum size in bytes of scheduler tokenbucket (ratelimiter)
-	var maxBucketSize int64 = 1000000
+	var maxBucketSize int64 = 1e8
 
 	//vars for the active queue management
-	var aqmInterval int64 = 100000000
-	var aqmTarget int64 = 5000000
+	var aqmInterval int64 = 1e8
+	var aqmTarget int64 = 5e6
 	var droppedCount0 float64 = 1
 	var droppedCount1 float64 = 1
 	packetsDropped0, packetsDropped1 := 0, 0
@@ -145,9 +145,9 @@ func main(){
 		aqmBox := tm.NewBox(60, 7, 0)
 		aqmTable := tm.NewTable(0, 10, 5, ' ', 0)
 		fmt.Fprintf(aqmTable, "aqm\tdeltaT in ms\t packets dropped\n")
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT0*0.000001, packetsDropped0)
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT1*0.000001, packetsDropped1)
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", "sum", (currentAverageDeltaT0*0.000001+currentAverageDeltaT1*0.000001)/2, packetsDropped0+packetsDropped1)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT0/1e6, packetsDropped0)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT1/1e6, packetsDropped1)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", "sum", ((currentAverageDeltaT0+currentAverageDeltaT1)/2)/1e6, packetsDropped0+packetsDropped1)
 		fmt.Fprint(aqmBox, aqmTable)
 		tm.Print(aqmBox.String())
 

@@ -7,7 +7,7 @@ import (
 	// "encoding/json"
 	// "strconv"
 	// "bytes"
-	"log"
+	//"log"
 )
 
 //todo: add synchronization because of threads
@@ -26,22 +26,6 @@ func NewQueue(maxSize int, currentQueueSize *int) *Queue{
 }
 
 func (q *Queue) Push(packet *packet.Packet) bool {
-	//Todo: check if queue is full
-	//Todo: what to do with Queue.size?
-
-	
-	if(packet.Data == nil){
-		log.Println("ALLAAARRRMMMMM")
-	}
-
-	if(len(packet.Data) == 0){
-		log.Println("ALLAAARRRMMMMM")
-	}
-
-	if(len(packet.Data) < 10){
-		log.Println("ALLAAARRRMMMMM")
-	}
-
 	if(*q.size+1>q.maxSize){
 		return false
 	}
@@ -73,12 +57,13 @@ func (q *Queue) Push(packet *packet.Packet) bool {
 	return true
 }
 
-//actual packet size in bytes
+//returns actual packet size in bytes
 func (q *Queue) NextPacketSize() int {
 	if len(q.data) == 0 {
 		return 0
 	}
 	size := q.data[0].Size
+	//log.Println(*q.size)
 	if(size == 0){
 		q.Pop()
 	}
@@ -92,6 +77,7 @@ func (q *Queue) Pop() *packet.Packet {
 	p := q.data[0]
 	*q.size -= 1
 	p.DequeueTimestamp = time.Now().UnixNano()
+	//log.Println(*q.size)
 	q.data = q.data[1:]
 	//log.Println("package dequeued")
 	return &p
