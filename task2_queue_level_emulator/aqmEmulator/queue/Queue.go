@@ -26,12 +26,15 @@ func NewQueue(maxSize int, currentQueueSize *int) *Queue{
 }
 
 func (q *Queue) Push(packet *packet.Packet) bool {
-	if(*q.size+1>q.maxSize){
+	if(len(q.data)+1>q.maxSize){
 		return false
 	}
 	packet.EnqueueTimestamp = time.Now().UnixNano()
 	q.data = append(q.data, *packet)
-	*q.size += 1
+	*q.size = len(q.data)-1
+	//if(*q.size != q.currentSize){
+		//log.Printf("push: %d | %d", *q.size, q.currentSize)
+	//}
 	//log.Println("package enqueued")
 	//Todo: return correct result
 	// go func(q *Queue){
@@ -75,9 +78,12 @@ func (q *Queue) Pop() *packet.Packet {
 		return nil
 	}
 	p := q.data[0]
-	*q.size -= 1
+	*q.size = len(q.data)-1
 	p.DequeueTimestamp = time.Now().UnixNano()
-	//log.Println(*q.size)
+	//if(*q.size != q.currentSize){
+		//log.Printf("pop: %d | %d", *q.size, q.currentSize)
+	//}
+	
 	q.data = q.data[1:]
 	//log.Println("package dequeued")
 	return &p

@@ -29,7 +29,7 @@ func NewReceiver(wg *sync.WaitGroup, m sync.Mutex, receiverInterface string, que
 	syscall.Bind(fd, &sa)
 
 	for {
-		buf := make([]byte, 4096)
+		buf := make([]byte, 1600)
 		n, _, _ := syscall.Recvfrom(fd, buf, 0)
 		
 		dest := buf[0:6]

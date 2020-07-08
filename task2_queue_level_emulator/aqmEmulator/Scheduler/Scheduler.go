@@ -10,10 +10,9 @@ import (
 )
 
 //this scheduler uses the Tokenbucket algorithm
-func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *sender.Sender, aqm *aqm.Aqm, bucket *int64, maxBucketSize int64) {
+func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *sender.Sender, aqm *aqm.Aqm, bucket *int64, maxBucketSize int64, tokenGenerationRate float32) {
 	//todo: parameter auslagern
 	//todo: time sleep einfügen und auslagern
-	tokenGenerationRate := 0.1
 	*bucket = maxBucketSize
 	var lastTokenUpdate int64 = time.Now().UnixNano()
 

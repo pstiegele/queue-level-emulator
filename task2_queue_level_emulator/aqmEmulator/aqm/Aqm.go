@@ -75,14 +75,14 @@ func (aqm *Aqm) SendingOk(p *packet.Packet) bool{
 	
 /*set the next time for dropping*/
 func setNextDropTime(aqm *Aqm){
-	*aqm.packetsDropped+=1
-	aqm.nextDropTime= time.Now().UnixNano() + int64(100/math.Sqrt(*aqm.droppedCount))
+	*aqm.packetsDropped++
+	aqm.nextDropTime= time.Now().UnixNano() + (int64(100/math.Sqrt(*aqm.droppedCount))*1e6)
 }
 	
 
 /*reset the next time for dropping, reset also the dropped packet count*/
 func resetNextDropTime(aqm *Aqm){
-	aqm.nextDropTime=time.Now().UnixNano() + 100 
+	aqm.nextDropTime=time.Now().UnixNano() + aqm.interval
 	//todo: is it correct to set droppedCount here plus 1? maybe here =1 and in setNextDropTime +1
 	*aqm.droppedCount+=1.0
 

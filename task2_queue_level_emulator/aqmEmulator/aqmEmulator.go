@@ -13,7 +13,6 @@ import (
 	tm "github.com/buger/goterm"
 )
 
-//todo: split aqm on queues
 
 func main(){
 	fmt.Println("AQM Emulator started")
@@ -28,12 +27,17 @@ func main(){
 
 	//maximum size of packets inside a queue
 	var maxQueueSize int = 1e6
+	//current queue load
+	currentQueueSize0, currentQueueSize1 := 0, 0
 
 	//scheduler tokenbucket vars
+	//bucketSizeX indicates, how many tokens (=bytes) are currently in the bucket
 	var bucketSize0 int64 = 0
 	var bucketSize1 int64 = 0
-	//maximum size in bytes of scheduler tokenbucket (ratelimiter)
-	var maxBucketSize int64 = 1e8
+	//tokenGenerationRate defines, how many tokens are being generated per ns
+	var tokenGenerationRate float32 = 0.02 //10mbps --> 1e7 bits per 1e9 ns = 1e7/1e9 = 0,01
+	//maximum size in bytes of the tokenbucket
+	var maxBucketSize int64 = 1000*1500
 
 	//vars for the active queue management
 	var aqmInterval int64 = 1e8
@@ -46,10 +50,10 @@ func main(){
 	//vars for console statistics
 	receivedPackets0, receivedPackets1 := 0, 0
 	sentPackets0, sentPackets1 := 0, 0
-	currentQueueSize0, currentQueueSize1 := 0, 0
-
-	var currentAverageDeltaT0 float64 = 0
-	var currentAverageDeltaT1 float64 = 0
+	
+	//currentDeltaTX reflects the latest dequeue-enqueue timedelta, so for how long the packet was inside the queue
+	var currentDeltaT0 float64 = 0
+	var currentDeltaT1 float64 = 0
 	
 
 	//create queue for every interface
@@ -57,37 +61,31 @@ func main(){
 	queue1 := queue.NewQueue(maxQueueSize, &currentQueueSize1)
 
 	//create active queue managements for every queue
-	aqm0 := aqm.NewAqm(aqmInterval, aqmTarget, &droppedCount0, &currentAverageDeltaT0, &packetsDropped0)
-	aqm1 := aqm.NewAqm(aqmInterval, aqmTarget, &droppedCount1, &currentAverageDeltaT1, &packetsDropped1)
+	aqm0 := aqm.NewAqm(aqmInterval, aqmTarget, &droppedCount0, &currentDeltaT0, &packetsDropped0)
+	aqm1 := aqm.NewAqm(aqmInterval, aqmTarget, &droppedCount1, &currentDeltaT1, &packetsDropped1)
 	
 	//create sender for every interface
 	sender0 := sender.NewSender(iface0, &sentPackets0)
 	sender1 := sender.NewSender(iface1, &sentPackets1)
 
 	//create scheduler to pop packets out of the queue and give them over to the sender
-	go scheduler.NewScheduler(wg, m0, queue0, sender0, aqm0, &bucketSize0, maxBucketSize)
-	go scheduler.NewScheduler(wg, m1, queue1, sender1, aqm1, &bucketSize1, maxBucketSize)
+	go scheduler.NewScheduler(wg, m0, queue0, sender0, aqm0, &bucketSize0, maxBucketSize, tokenGenerationRate)
+	go scheduler.NewScheduler(wg, m1, queue1, sender1, aqm1, &bucketSize1, maxBucketSize, tokenGenerationRate)
 
 	//start thread0 h1 -> h3 here
 	go receiver.NewReceiver(wg, m1, iface0, queue1, createForwardingRules(0), &receivedPackets0)
 	//start thread1 h3 -> h1 here
 	go receiver.NewReceiver(wg, m0, iface1, queue0, createForwardingRules(1), &receivedPackets1)
 
-
+	//add 4 threads to the waitgroup
 	wg.Add(4)
 
 	tm.Clear()
 	i := 0
-	//d := false
+	//create the statistic screen
 	for{
-		// if(currentQueueSize0>20&&d==false){
-		// 	p := queue0.Pop()
-		// 	log.Println()
-		// 	log.Println(p)
-		// 	d=true
-		// }
 		tm.MoveCursor(1,1)
-		
+		//just displaying the heading with animation
 		heading := "AQM Emulator is running"
 		switch i {
 		case 0:
@@ -106,10 +104,10 @@ func main(){
 			heading = heading+"...."
 			
 		}
-		tm.Print(tm.Color(tm.Bold(heading+"         \n"), tm.RED))
+		tm.Print(tm.Color(tm.Bold(heading+"         \n"), tm.RED)) //the spaces are to override the latest heading
 		
+		//packets box
 		tm.MoveCursor(1,3)
-
 		packetsBox := tm.NewBox(60, 7, 0)
 		packetTable := tm.NewTable(0, 10, 5, ' ', 0)
 		fmt.Fprintf(packetTable, "\tpackets received\tpackets sent\n")
@@ -121,7 +119,6 @@ func main(){
 
 
 		tm.MoveCursor(1,13)
-
 		queueBox := tm.NewBox(60, 7, 0)
 		queueTable := tm.NewTable(0, 10, 5, ' ', 0)
 		fmt.Fprintf(queueTable, "\tpacket queue size\n")
@@ -145,14 +142,14 @@ func main(){
 		aqmBox := tm.NewBox(60, 7, 0)
 		aqmTable := tm.NewTable(0, 10, 5, ' ', 0)
 		fmt.Fprintf(aqmTable, "aqm\tdeltaT in ms\t packets dropped\n")
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT0/1e6, packetsDropped0)
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentAverageDeltaT1/1e6, packetsDropped1)
-		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", "sum", ((currentAverageDeltaT0+currentAverageDeltaT1)/2)/1e6, packetsDropped0+packetsDropped1)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentDeltaT0/1e6, packetsDropped0)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface1, currentDeltaT1/1e6, packetsDropped1)
+		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", "sum", ((currentDeltaT0+currentDeltaT1)/2)/1e6, packetsDropped0+packetsDropped1)
 		fmt.Fprint(aqmBox, aqmTable)
 		tm.Print(aqmBox.String())
 
 		tm.Flush()
-		time.Sleep(1 * time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 
 
