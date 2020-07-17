@@ -1,0 +1,73 @@
+We use Mininet to create a network topology as quick as possible. Mininet~\cite{6860404} is a network emulation orchestration system with which you can create any number of hosts, switches, links and controllers - everything in software. And for the most part, they behave like the real hardware components. The process-based virtualization of Linux in combination with network namespaces is used for this. \newline
+In Mininet various topologies can be created. To implement our AQM Emulator, we have created a topology with 3 hosts as shown in Fig. \ref{fig:topology}. Host 1 and host 3 behave as clients, whereas host 2 takes on the role of buffering and forwarding packages by using our CoDel queue discipline implementation. As mentioned earlier, our work consists of two phases. In phase 1, we implemented the User Space Packet Forwarding with various programming languages, then do the performance comparison between them and choose the most suitable one, which will be used in phase 2 to implement the AQM Emulator Framework including the CoDel queuing discipline.
+
+
+%\subsection{Phase 1: User Space Packet Forwarding}
+\subsection{Design of the topology for programming language evaluation}
+A basic communication must have at least two hosts, which we will call host 1 and host 3 and the network between them. Since we want to keep the network topology as simple as possible, the network between these two hosts is simply a single node which is the host 2 in the middle as we can see in the Fig. \ref{fig:topology}. According to this simple topology, host 1 and host 3 can communicate with each other via host 2. Therefore host 2 is a forwarding node, which will simply sniff the traffic at one interface and send it to the other interface. We also want to point out that there is no queueing disciplines implementation at host 2 in this phase 1 yet. Instead, the packet will be forwarded as fast as possible, since we want to evaluate which language is the fastest one.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{topo_no_buffer}
+\caption{\em Forwarding topology}
+\label{fig:topology}
+\end{figure}
+
+\subsection{Linux kernel forwarding}
+Our first approach after we build up the topology was to have a comparison for our own implementations. So we used the basic linux kernel forwarding.\newline 
+At first, host 1 and host 3 is sad to use host 2 as the forwarding node. This can be configured with the command \textit{sysctl net.ipv4.ip\_forward = 1} at host 2 and \textit{ip route add default via host2\_ip dev [h1 interface / h3 interface]} at host 2 and host 3. As sad, with this configuration, the packets from host 1 will be forwarded to host 3 and vice versa by the linux kernel of host 2 without writing any program. Since there is no packet processing involved in this process, the throughput is very high as shown in Fig. \ref{fig:tcp}. Because we cannot easily modify the behaviour of the linux kernel forwarding, we came up with the idea to emulate this forwarding functionality without using the linux kernel. This forwarding functionality is disabled with the command \textit{sudo sysctl net.ipv4.ip\_forward = 0}. Now the packets coming from host 1 will not be automatically forwarded to host 3. To be able to forward a packet, we need a simple forwarding program running at host 2, which is called the User space Packet Forwarding. Therefore, the same forwarding task will be written in different languages and executed at host 2.
+
+\subsection{Implementation of the User Space Packet Forwarding}
+As we have discussed earlier, a forwarding program must be executed at host 2 to serve the communication between host 1 and host 3. All of the implementation of each language have the same structure. This simple forwarding is structured as follow: \newline
+
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{packet_forward_psudo}
+\caption{\em pseudocode for User Space Packet Forwarding}
+\label{fig:pseudocode_packet_forwarding}
+\end{figure}
+In Fig. \ref{fig:topology}, we can see that host 2 has two interfaces. Therefore, we bind two sockets to these two interfaces to be able to sniff the whole traffic. Unlike the usual socket on a higher layer, which strips off the header field and sends only data to the application, we used raw sockets on the Data Link Layer. As the name suggests, raw socket doesn't strip off the headers. Therefore, the application can receive both data and header fields such as MAC address and IP address. Indeed, the application layer can manipulate these header fields such as modifying the destination address and so on. This is the advantage of using raw socket. Basically we have two threads running all the time in an endless loop at host 2 which is shown as pseudocode in Fig. \ref{fig:pseudocode_packet_forwarding}.
+
+Each socket will be assigned to a dedicated thread. Each thread can therefore continuously sniff the traffic at the interface that it's been attached to. Every time a packet is detected at any interface, we send them directly to the other interface. So every packet arrives at interface 1 will be forwarded to the interface 2 and vice versa. Now the forwarding program is running at host 2 and host 1 and host 3 are able to talk to each other.
+\subsection{Set up the evaluation enviroment}
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{ping_packet}
+\caption{\em Wireshark dump: ARP packets are sent before ICMP packets}
+\label{fig:arp_packets}
+\end{figure}
+Now we can test our forwarding by simply ping from host 1 to host 3 or vice versa. The needed round-trip-time was captured and is presented in Fig. \ref{fig:ping}. Similarly, the throughput was also measured by the tool \textit{iperf3}, which is widely used and available in various operating systems. For debugging purposes, we sniffed and captured every packet with \textit{tcpdump}~\cite{goyal2017comparative}. Then these captured packets can be opened with \textit{Wireshark}~\cite{orebaugh2006wireshark} for further analysis. For the ping, we observed that the RTT is very high right at the beginning. This could be explained by the fact that ARP packets must be sent before the ICMP packets to resolve the layer 2 address (MAC address) of the destination as we can see in Fig. \ref{fig:arp_packets}. 
+Since these pings are not the decisive factor for our evaluation, their results were only considered secondary for our evaluation. In particular, there were 100 000 pings that were sent from host 1 to host 3 within a 0,01s interval, in which the first 50 pings out of \mbox{100 000 pings} will not be included in the evaluation to make the evaluation more precisely because of the slow start. We also captured the packet traffic while the iperf3 tool was being executed. As shown in Fig. \ref{fig:tcp_wireshark}, TCP packets will be sent back and forth between host 1 and host 3 during the the throughput testing process.
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{tcp_packet}
+\caption{\em TCP packets are sent back and forth between host 1 and host 3 when iperf3 is used}
+\label{fig:tcp_wireshark}
+\end{figure}
+Since all tests depends heavily on the available resources, running the evaluation on different computers will result in different numbers and it's not comparable. To get rid of this problem, all tests were carried out on the same system. For the same reason, the absolute results of the test are only of limited significance; the relative ratio is much more important, both when evaluating the fastest programming language for raw sockets and when evaluating the best active queue management algorithm.\\
+For our evaluations a virtual machine was used via Oracle's Virtualbox on which an Ubuntu 18.04. was installed. The system had access to 4GB RAM and 4 CPU cores, each with a base clock of 3.6 GHz (Turbo clock: 4.2 GHz, Ryzen 5 3600, CPU limit: 100 \%).\\
+\subsection{Automate the evaluation process}
+As we've seen in the last section, the environment must be set up for performance evaluation. This process takes a lot of time and effort. For example, we have to set up the same network topology for every testing by manually typing command lines even though there are only two different topologies (one with ip forwarding and the other without ip forwarding). That's why a python script was written to automate this process as shown in Fig. \ref{fig:python_script}. Instead of writing every single command line, we only have to run this python script. This script allows the user to choose the network topology and choose the language that needs to be evaluated. There are 5 different languages that were evaluated including Python 3, Python 2, C, Go and Rust. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{python_script}
+\caption{\em Python Script to automate the evaluation}
+\label{fig:python_script}
+\end{figure}
+
+\subsection{Comparing the performance and choosing the most appropriate language}
+Fig. \ref{fig:ping} shows how long a packet takes from the sender to the receiver and back again. A shorter round-trip-time promises a better connection, as this means that we have low latency between the sender and the receiver. By far the worst RTT occurred in the C implementation. Here the ping duration was very high with an average of 13.5ms. The other programming languages differed only slightly: The values for Python 3, Python 2, Go and Rust were between 0.09ms and 0.12ms. Only the ip\_forward alternative could beat this with 0.02ms.\newline In addition to latency, the bandwidth that is actually available is of course the most important factor in choosing the fastest programming language for raw sockets. As can be seen in Fig. \ref{fig:tcp}, ip\_forward achieves the highest performance with 5.8 Gbit/s. Apart from this, Go stands out with 3.4 Gbit/s. The languages C, Python 2, Python 3 and especially Rust cannot keep up with this.\newline
+Due to the good performance of Go, the increased popularity in the community in the last few years, the now quite high distribution in the network and cloud computing area and because the language is well suited for rapid programming, we ultimately decided to use Go in phase 2 of the project to implement our user space queue level emulator.
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{ping}
+\caption{\em Ping round trip time per language}
+\label{fig:ping}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{tcp}
+\caption{\em TCP throughput per language}
+\label{fig:tcp}
+\end{figure}

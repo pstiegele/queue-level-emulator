@@ -26,7 +26,7 @@ func main(){
 	iface1 := "h2-eth1"
 
 	//maximum size of packets inside a queue
-	var maxQueueSize int = 1e6
+	var maxQueueSize int = 200
 	//current queue load
 	currentQueueSize0, currentQueueSize1 := 0, 0
 
@@ -35,7 +35,7 @@ func main(){
 	var bucketSize0 int64 = 0
 	var bucketSize1 int64 = 0
 	//tokenGenerationRate defines, how many tokens are being generated per ns
-	var tokenGenerationRate float32 = 0.02 //10mbps --> 1e7 bits per 1e9 ns = 1e7/1e9 = 0,01
+	var tokenGenerationRate float32 = 0.01 //80mbps --> 1e7 bits per 1e9 ns / 8 = 1e7/1e9 = 0,01
 	//maximum size in bytes of the tokenbucket
 	var maxBucketSize int64 = 1000*1500
 
@@ -117,47 +117,49 @@ func main(){
 		fmt.Fprint(packetsBox, packetTable)
 		tm.Print(packetsBox.String())
 
-
+		//queue box
 		tm.MoveCursor(1,13)
 		queueBox := tm.NewBox(60, 7, 0)
 		queueTable := tm.NewTable(0, 10, 5, ' ', 0)
-		fmt.Fprintf(queueTable, "\tpacket queue size\n")
+		fmt.Fprintf(queueTable, "\tpacket queue size [packets]\n")
 		fmt.Fprintf(queueTable, "%s\t%d / %d\n", iface0, currentQueueSize0, maxQueueSize)
 		fmt.Fprintf(queueTable, "%s\t%d / %d\n", iface1, currentQueueSize1, maxQueueSize)
 		fmt.Fprint(queueBox, queueTable)
 		tm.Print(queueBox.String())
 
+		//schedular box
 		tm.MoveCursor(1,23)
-
 		schedulerBox := tm.NewBox(60, 7, 0)
 		schedulerTable := tm.NewTable(0, 10, 5, ' ', 0)
-		fmt.Fprintf(schedulerTable, "\tscheduler bucket size\n")
+		fmt.Fprintf(schedulerTable, "\tscheduler bucket size [bytes]\n")
 		fmt.Fprintf(schedulerTable, "%s\t%d / %d\n", iface0, bucketSize0, maxBucketSize)
 		fmt.Fprintf(schedulerTable, "%s\t%d / %d\n", iface1, bucketSize1, maxBucketSize)
 		fmt.Fprint(schedulerBox, schedulerTable)
 		tm.Print(schedulerBox.String())
 
+		//aqm box
 		tm.MoveCursor(1,33)
-
 		aqmBox := tm.NewBox(60, 7, 0)
 		aqmTable := tm.NewTable(0, 10, 5, ' ', 0)
-		fmt.Fprintf(aqmTable, "aqm\tdeltaT in ms\t packets dropped\n")
+		fmt.Fprintf(aqmTable, "aqm\tdelta T [ms]\t packets dropped\n")
 		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface0, currentDeltaT0/1e6, packetsDropped0)
 		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", iface1, currentDeltaT1/1e6, packetsDropped1)
 		fmt.Fprintf(aqmTable, "%s\t%f\t%d\n", "sum", ((currentDeltaT0+currentDeltaT1)/2)/1e6, packetsDropped0+packetsDropped1)
 		fmt.Fprint(aqmBox, aqmTable)
 		tm.Print(aqmBox.String())
 
+		//flush the screen and sleep for 200ms
 		tm.Flush()
 		time.Sleep(200 * time.Millisecond)
 	}
 
-
+	//in case of the for loop would end, this Waitgroup here waits for the go routines to finish (they will never be)
 	wg.Wait()
 
 }
 
-
+//forwardingRules defines, which packets should be forwarded and which not. 
+//because we only have 
 func createForwardingRules(direction int) receiver.ForwardingRules{
 	if(direction == 0){
 		fr := receiver.ForwardingRules{

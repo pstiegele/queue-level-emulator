@@ -24,7 +24,7 @@ def parse_iperf3_json(path):
     print(resLst)
     return  resLst
 
-def plotIperf3(raw_data):
+def plotIperf3(raw_data, raw_data2):
     plt.figure(1)
     fig = plt.gcf()
     fig.canvas.set_window_title('IPerf3')
@@ -40,9 +40,23 @@ def plotIperf3(raw_data):
         y_val = y_val/len(data)
         x_values.append(x_val)
         y_values.append(y_val)
-    plt.plot(x_values, y_values)
+
+    x2_values = [0]
+    y2_values = [0]
+    for data2 in raw_data2:
+        x2_val = data2[0]['start']
+        y2_val = 0
+        for x2 in data2:
+            y2_val += x2['rtt']/1000.0
+        y2_val = y2_val/len(data2)
+        x2_values.append(x2_val)
+        y2_values.append(y2_val)
+
+    plt.plot(x_values, y_values, label="No AQM")
+    plt.plot(x2_values, y2_values, label="With AQM")
     plt.ylim(ymin = 0)
     plt.ylabel('RTT [ms]')
+    plt.legend()
     ax = plt.gca()
     ax.set_xticklabels([])
 
@@ -57,14 +71,32 @@ def plotIperf3(raw_data):
         y_val = y_val/1000
         x_values.append(x_val)
         y_values.append(y_val)
-    plt.plot(x_values, y_values)
+
+    x2_values = [0]
+    y2_values = [0]
+    for data2 in raw_data2:
+        x2_val = data2[0]['start']
+        y2_val = 0
+        for x2 in data2:
+            y2_val += x2['bytes']*8 / x2['seconds']
+        y2_val = y2_val/1000
+        x2_values.append(x2_val)
+        y2_values.append(y2_val)
+
+   
+
+
+    plt.plot(x_values, y_values, label="No AQM")
+    plt.plot(x2_values, y2_values, label="With AQM")
     plt.ylim(ymin = 0)
     plt.xlabel('time [s]')
     plt.ylabel('Throughput [kbits/s]')
-    plt.suptitle('iperf3 json output')
+    plt.legend()
+    plt.suptitle('RTT & Throughput of AQM Emulator')
     fig = plt.gcf()
     fig.set_size_inches(6, 3, forward=True)
-    plt.savefig('iperf3.pdf', bbox_inches='tight')
+    plt.savefig('iperf3_aqm_and_noaqm.pdf', bbox_inches='tight')
 
-res = parse_iperf3_json("iperf.json")
-plotIperf3(res)
+res = parse_iperf3_json("iperf_noaqm.json")
+res2 = parse_iperf3_json("iperf_aqm.json")
+plotIperf3(res, res2)

@@ -1,0 +1,32 @@
+The bandwidth requirements for Internet connections are steadily increasing - for example by the use of online video stream platforms with 4k streaming or the use of video telephony. A high data throughput is needed to meet these requirements. However, if this reaches its capacity limit, a sophisticated approach is required to handle this limitation as good as possible. \newline
+The typical reason for bottlenecks are the links between routers which have less bandwidth than required. Assume that there are three hosts as seen in Fig. \ref{fig:topology}. Host 1 want to send data to host 3 with a very high transmission rate. The link between host 2 and host 3 (egress link) has a very limited bandwidth. Host 2 only takes care of forwarding the packets. The link between host 1 and host 2 has a very high bandwidth.\newline 
+Unfortunately, in this example, host 2 cannot forward the packets to host 3 immediately, since the egress link with the limited bandwidth has reached its maximum capacity.  As a result, the incoming packets will pile up at host 2. Therefore there must be a buffer (a queue) at host 2 where the waiting packets can be temporarily queued. Typically, a router holds a queue for each interface in which newly arriving packets are inserted. Of course this buffer has only limit resources. But if more packets gets received than can be processed, this buffer will be filled up quickly. If the maximum number of bytes or packets (depending on the queue type) is reached, in the simple case the newly arriving packet gets dropped. This process is called \textit{drop tail} and has some disadvantages. \newline
+One of them is, that the TCP sending rate will not decrease until the buffer is full and every incoming packet at the tail of the queue gets dropped. And until the sender detects this, it takes a while in which potentially many more packets gets dropped. Therefore, TCP will always fill up the queue to a certain value which is close to the maximum queue size. In other words, the queue has been bloated and it'll get bigger over time and will never be empty as long as the load does not decrease. This is unwanted in many cases and is called bufferbloat~\cite{jiang2012understanding}.\newline
+In addition, there is still another problem with the drop tail method, which is the TCP global synchronization~\cite{qiu2001understanding}. Qiu et al. has pointed out in their paper about this problem and they suggested to use \textit{RED} (random early detection) to break this globalization. TCP global synchronization occurs when the buffer is full and packets from multiple TCP connections gets dropped at the same time. This leads to a synchronized decrease in the data throughput of each TCP connection, which leads a moment later to a periodic increase and a repeated decrease in the data throughput. In Fig. \ref{fig:globalSynchronization} it can be seen, that this leads to a non-ideal utilization of the possible data throughput.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=8cm]{GlobalSynchronization}
+\caption{\em Global Synchronization, these three TCP flows suffer from packet lost at the same time and gets synchronized}
+\label{fig:globalSynchronization}
+\end{figure}
+
+Bufferbloat occurs when the transmission of packets is delayed due to very large and already filled buffers. If the utilization of the link is constantly high, the buffer will stay full and every packet needs to walk through the buffer which costs some time.
+% \textcolor{red}{if we have a filled buffer/bufferbloat the sending rate is constant high! only in case a queue becomes empty the rate < link rate.
+%Thus there are two cases in current queues:
+%1. heavy bufferbloat
+%2. link not fully utilized.}. 
+This can be a problem especially for time-critical applications such as VOIP telephony or gaming.\newline
+An alternative to the classic drop tail procedure is active queue management(AQM)~\cite{6329367}. In principle, AQM will drop packets even if the queue is not yet full. Therefore it can combat against the bufferbloat and also against TCP global synchronization. Consequently the latency and throughput will be improved. There are many different AQM strategies, such as \textit{controlled delay} (CoDel)~\cite{rfc8290}, \textit{random early detection} (RED)~\cite{rfc2309} or \textit{proportional integral controller enhanced} (PIE)~\cite{rfc8033}. The AQM is realized by the network scheduler of the operating system. \newline The network scheduler has the responsibility to receive the packets, put them temporarily into a buffer and send them in a specific order depending on which queue algorithm is being used. Some queuing disciplines are already available in modern operating systems. For example, the linux kernel network scheduler has implemented the \textit{fair queue codel} (fq codel) as its default queuing algorithm.\newline 
+As we have pointed out, there are a lot of queuing algorithms. So there is a desire to compare the performance of these. To create the conditions for such a comparison, in this work, an active queue management emulator was built. The goal is to be able to quickly evaluate the performance of many active queuing disciplines and compare the efficiency as well as point out the disadvantages between them in a mininet emulator testbed~\cite{kaur2014mininet}. \newline 
+In general, our work consists of two phases:
+\begin{description}
+  \item[$\bullet$] Phase 1: Programming language evaluation
+  \item[$\bullet$] Phase 2: Implementation of the AQM emulator in a suitable language
+\end{description}
+In phase 1 of the project, we have to determine the most efficient programming language for the purpose of forwarding packets on a data link layer basis. This step will be discussed in detail in the section III, User Space Packet Forwarding. After discovering the most efficient programming language for our scenario, we continued with phase 2 in which we designed and programmed an active queue level emulator which will run in user space. By this approach, the rapid development of various AQM algorithms is possible. For our purpose we have implemented the classic drop tail method and a CoDel implementation and compared them. Section IV, Queue Emulation Framework will cover this phase 2. Afterwards, the conclusion will be discussed in section V. \newline 
+
+
+ 
+
+

@@ -40,6 +40,7 @@ func NewScheduler(wg *sync.WaitGroup, m sync.Mutex, queue *queue.Queue, sender *
 			p := queue.Pop()
 			m.Unlock()
 			if p != nil{
+				//just comment the next if out to remove the aqm codel
 				if(aqm.SendingOk(p)){
 					//log.Println("aqm says its ok to send, so transport the packet to the sender")
 					*bucket -= nextPacketSize

@@ -1,0 +1,63 @@
+\subsection{Implementation of the active queue management emulator}
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{topology}
+\caption{\em Host 2 buffers and forwards packet with interface 0 on the left side and interface 1 on the right side}
+\label{fig:topology_buffer}
+\end{figure} 
+In our second step we implemented the AQM Emulator with the programming language Go. Firstly, our network topology has been changed a little bit as shown in Fig. \ref{fig:topology_buffer}. In opposite to the network topology in phase 1 where there was no queue at host 2, we have now a queue implemented at host 2. The reason is because of the bottleneck egress link (marked in red), which has a very low bandwidth. If the sending rate of host 1 is higher than the maximum rate of egress link, the egress link will become quickly occupied. Host 2 can then not forward any packets to the interface 1 anymore. As a result, host 2 has to drop some packets if there is no queue implementation at host 2 . Therefore, there must be a buffer in the middle to prevent such a scenario from happening. Therefore, we came up with the simplified topology which consists of two hosts as clients and another host in the middle for buffering and forwarding purposes as shown in Fig. \ref{fig:topology_buffer}. Host 1 can only communicate with host 3 via host 2 and vice versa, it's very similar as in phase 1.
+We choose to implement CoDel as a queuing discipline. However, our framework can also be applied for any other AQM as well. To be able to limit the egress link artificially, a rate limiter was implemented. The \textit{token bucket} method was used as the procedure. The token bucket works as shown in Fig. \ref{fig:token_bucket}. 
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{tokenbucket}
+\caption{\em Token Bucket traffic shaping principle}
+\label{fig:token_bucket}
+\end{figure}
+If the sender wants to transmit data, he has to have a sufficient amount of tokens. But there are only a limit number of tokens which are generated for each time slot. If the sends-function wants to send data but there are no tokens left, then it has to wait until enough tokens are generated. Because of that we are able to reduce the sending rate. \newline 
+There is one more thing that needs to take into account. As the name suggests, we have here a bucket which has a limit capacity. Whenever tokens are generated, they will be put into this bucket. If there is no data to be sent, the tokens will quickly fill up the bucket. If the bucket has reached its capacity, then the generated tokens will not be put into the bucket anymore. In summary, the size of the bucket and the token's generated rate will shape the sending rate. Obviously, these two parameters are adjustable and can therefore be adapted to fit our needs. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=7cm]{task2Dashboard}
+\caption{\em Dashboard of the AQM Emulator while running throughput test}
+\label{fig:aqmEmulator_dashboard}
+\end{figure}
+As can be seen in Fig. \ref{fig:aqmEmulator_dashboard}, it is possible to monitor the most important parameters during the test run via the built-in dashboard. The number of packets received and sent is displayed, as well as the current queue load, how many tokens are currently available in the token bucket, how much time the last packet has spent in the queue and how many packets have already been discarded due to the AQM CoDel implementation.
+\subsection{Structure of the code base}
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{codebase}
+\caption{\em General steps of the code base}
+\label{fig:codebase}
+\end{figure}
+The general steps of our Go code base is shown in the Fig. \ref{fig:codebase}. To be able to realize the AQM Emulator, there are five main classes in our implementation:
+\begin{description}
+  \item[$\bullet$] Sender class
+  \item[$\bullet$] Receiver class
+   \item[$\bullet$] AQM class
+   \item[$\bullet$] Scheduler class
+   \item[$\bullet$] Queue class	
+   
+\end{description}
+Receiver and Sender class are responsible to sniff the traffic with raw sockets, put it in the queues and forward the packets based on the AQM's decision. The Queue class is where the queue buffer is located and it also should capture the timestamps of the packets whenever a packet is enqueued or dequeued. The AQM class is where the CoDel queuing discipline is implemented. The scheduler class is the place where we implemented the token bucket. As we can see in the Fig. \ref{fig:codebase}, this scheduler will be executed in a infinite loop. In this loop, the dequeue request will be continuously generated. Every time a dequeue request arrives, we first check the rate limiter if there are sufficient tokens inside the bucket. If there is enough amount of tokens available inside the bucket, it must call the AQM function for further decision. As we showed in the section "State of the Art / Related Work", there are two possible actions after calling AQM. The first one is to dequeue the packet out of the queue. And the second possibility is to drop this packet if it violates two conditions that haven been shown in Fig. \ref{fig:codel}. 
+\subsection{Result}
+\begin{figure}[htbp]
+\centering
+\includegraphics*[width=9cm]{iperf3_aqm_and_noaqm}
+\caption{\em RTT \& Throughput of AQM Emulator with and without AQM}
+\label{fig:aqm_on_off_comparison}
+\end{figure}
+In the ideal state, i.e. without the rate limiter intervening or the queue becoming full, the implementation enables a maximum bandwidth between 400-500 Mbps.\newline
+These values are significantly lower compared to the value of our Go implementation from phase 1 with 3.4 Gbps (see Fig. \ref{fig:tcp}). This can be explained by the fact that phase 1 was much less complex. If a packet was received, it was sent directly to the other interface without detours. This avoids costly tasks such as context switches, multiple copying of variables, calculations and suchlike. \newline
+In order to measure the performance gain by using CoDel, a bandwidth test was done with an active AQM implementation and one without. Care was taken to ensure that despite deactivating the AQM, its calculations continued to be carried out, but were not taken into account. This should avoid a possible deviation due to a lower required processor load in order not to influence the result.\newline
+The configuration of the AQM emulator:
+\begin{itemize}
+  \item Maximum queue size: 200 packages
+  \item Token Bucket Generation Rate: 0.01 ($\sim$ 10 Mbps)
+  \item Maximum token bucket size: 1.5 * 10 \textsuperscript{6} bytes (corresponds to $\sim$ 1000 iperf packets)
+  \item CoDel inital interval: 100ms
+  \item CoDel target: 5ms
+\end{itemize}
+The bandwidth was limited to approximately 10 Mbps by the Token bucket Scheduler. As can be seen in Fig. \ref{fig:aqm_on_off_comparison}, the throughput with and without AQM is relatively comparable, but also very fluctuating. After a 60 second test, an average bandwidth of 10.8 Mbps when running with AQM and an average bandwidth of 10.6 Mbps when running without AQM were determined.
+Since the results are not consistent, a higher throughput for the variant with AQM cannot generally be assumed here. \newline
+However, the lower latency when using CoDel as an AQM algorithm is clear: As can be seen in Fig. \ref{fig:aqm_on_off_comparison}, the RTT without AQM is significantly higher than with AQM. This means that thanks to the use of CoDel, the packets reach the recipient faster on average and there is no bufferbloat in the queue of the emulator. If the queue size is further increased in the variant without AQM, the bufferbloat becomes even larger and the latency increases significantly over time.
